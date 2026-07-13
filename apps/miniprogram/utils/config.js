@@ -9,7 +9,7 @@ function getDefaultApiBase() {
         }
     }
     catch (_) { }
-    return "http://10.14.103.162:3000/api";
+    return "https://api.lmqstudio.com/api";
 }
 function getDefaultWsBase() {
     try {
@@ -19,7 +19,7 @@ function getDefaultWsBase() {
         }
     }
     catch (_) { }
-    return "http://10.14.103.162:3000";
+    return "https://api.lmqstudio.com";
 }
 exports.config = {
     apiBaseUrl: getDefaultApiBase(),

@@ -1,4 +1,4 @@
-const API_BASE = "http://10.14.103.162:3000/api"; // Production URL
+const API_BASE = "https://api.lmqstudio.com/api";
 
 interface RequestOptions {
   url: string;

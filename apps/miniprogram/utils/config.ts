@@ -5,7 +5,7 @@ function getDefaultApiBase(): string {
       return "http://127.0.0.1:3000/api";
     }
   } catch (_) {}
-  return "http://10.14.103.162:3000/api";
+  return "https://api.lmqstudio.com/api";
 }
 
 function getDefaultWsBase(): string {
@@ -15,7 +15,7 @@ function getDefaultWsBase(): string {
       return "http://127.0.0.1:3000";
     }
   } catch (_) {}
-  return "http://10.14.103.162:3000";
+  return "https://api.lmqstudio.com";
 }
 
 export const config = {
