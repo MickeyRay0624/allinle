@@ -3,5 +3,7 @@
     "t-button": "tdesign-miniprogram/button/button",
     "poker-card": "/components/poker-card/index"
   },
-  "navigationBarTitleText": "好友练习房"
+  "navigationBarTitleText": "好友练习房",
+  "enableShareAppMessage": true,
+  "enableShareTimeline": true
 }

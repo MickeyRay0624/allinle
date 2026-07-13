@@ -1,3 +1,5 @@
 {
-  "navigationBarTitleText": "单人练习"
+  "navigationBarTitleText": "单人练习",
+  "enableShareAppMessage": true,
+  "enableShareTimeline": true
 }

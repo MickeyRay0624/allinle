@@ -1,3 +1,5 @@
 {
-  "navigationBarTitleText": "手牌复盘"
+  "navigationBarTitleText": "手牌复盘",
+  "enableShareAppMessage": true,
+  "enableShareTimeline": true
 }

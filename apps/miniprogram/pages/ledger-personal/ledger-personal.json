@@ -1,3 +1,5 @@
 {
-  "navigationBarTitleText": "个人记账"
+  "navigationBarTitleText": "个人记账",
+  "enableShareAppMessage": true,
+  "enableShareTimeline": true
 }

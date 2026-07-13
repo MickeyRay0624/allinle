@@ -18,6 +18,7 @@ App({
   },
 
   onShow() {
+    wx.showShareMenu({ menus: ["shareAppMessage", "shareTimeline"] });
     if (getToken()) this.checkNickname();
   },
 

@@ -1,4 +1,6 @@
 {
   "navigationBarTitleText": "设置昵称",
-  "disableScroll": true
+  "disableScroll": true,
+  "enableShareAppMessage": true,
+  "enableShareTimeline": true
 }

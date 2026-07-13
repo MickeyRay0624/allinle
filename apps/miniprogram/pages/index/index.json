@@ -1,3 +1,5 @@
 {
-  "navigationBarTitleText": "ALLINLE"
+  "navigationBarTitleText": "ALLINLE",
+  "enableShareAppMessage": true,
+  "enableShareTimeline": true
 }

@@ -1,3 +1,5 @@
 {
-  "navigationBarTitleText": "团队记账"
+  "navigationBarTitleText": "团队记账",
+  "enableShareAppMessage": true,
+  "enableShareTimeline": true
 }

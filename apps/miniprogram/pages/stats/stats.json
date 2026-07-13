@@ -1,3 +1,5 @@
 {
-  "navigationBarTitleText": "数据中心"
+  "navigationBarTitleText": "数据中心",
+  "enableShareAppMessage": true,
+  "enableShareTimeline": true
 }
