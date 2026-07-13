@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const request_1 = require("../../utils/request");
 let timer = null;
-Page({ data: { mode: "", room: null, roomCodeInput: "", titleInput: "", tempNameInput: "", showCreateForm: false, showJoinForm: false, showTempPlayerForm: false, myWinEntry: "", myLossEntry: "", disputeNote: "", currentHand: null, isOwner: false, myParticipantId: "", summary: null, isBuyInPhase: false, allHaveBuyIn: false, myBuyIn: "", balance: null, settlements: [] },
+Page({ data: { mode: "", room: null, roomCodeInput: "", titleInput: "", tempNameInput: "", showCreateForm: false, showJoinForm: false, showTempPlayerForm: false, myWinEntry: "", myLossEntry: "", disputeNote: "", currentHand: null, isOwner: false, myParticipantId: "", summary: null, isBuyInPhase: false, allHaveBuyIn: false, myBuyIn: "", balance: null, settlements: [], myConfirmed: false, confirmationCount: 0, confirmationTotal: 0 },
     onLoad(o) { if (o.roomCode)
         this.setData({ mode: "room", roomCodeInput: o.roomCode }); }, onShow() { this.loadData(); }, onUnload() { if (timer)
         clearInterval(timer); },
@@ -12,8 +12,15 @@ Page({ data: { mode: "", room: null, roomCodeInput: "", titleInput: "", tempName
         const room = await request_1.api.get(`/team-ledger/rooms/${this.data.roomCodeInput}`);
         const uid = wx.getStorageSync("user")?.id;
         const me = room.participants.find((p) => p.userId === uid);
+        const currentHand = room.hands?.[room.hands.length - 1] || null;
+        const activeParticipants = room.participants.filter((p) => p.status === "ACTIVE");
+        const confirmedEntries = currentHand?.entries?.filter((entry) => entry.status === "CONFIRMED") || [];
+        const myEntry = currentHand?.entries?.find((entry) => entry.participantId === me?.id);
         const isBuyInPhase = room.status === "ACTIVE" && room.currentHandNo === 0;
-        this.setData({ room, currentHand: room.hands?.[room.hands.length - 1] || null, isOwner: room.ownerUserId === uid, myParticipantId: me?.id || "", isBuyInPhase, allHaveBuyIn: room.participants.every((p) => p.buyInAmount !== null && p.buyInAmount !== undefined), myBuyIn: me?.buyInAmount === null || me?.buyInAmount === undefined ? "" : String(me.buyInAmount) });
+        const nextData = { room, currentHand, isOwner: room.ownerUserId === uid, myParticipantId: me?.id || "", isBuyInPhase, allHaveBuyIn: activeParticipants.every((p) => p.buyInAmount !== null && p.buyInAmount !== undefined), myConfirmed: myEntry?.status === "CONFIRMED", confirmationCount: confirmedEntries.length, confirmationTotal: activeParticipants.length };
+        if (me?.buyInAmount !== null && me?.buyInAmount !== undefined)
+            nextData.myBuyIn = String(me.buyInAmount);
+        this.setData(nextData);
         if (!timer)
             timer = setInterval(() => this.refreshRoom(), 2500);
     }
@@ -25,11 +32,17 @@ Page({ data: { mode: "", room: null, roomCodeInput: "", titleInput: "", tempName
     async doCreateRoom() { const r = await request_1.api.post("/team-ledger/rooms", { title: this.data.titleInput }); this.setData({ mode: "room", roomCodeInput: r.roomCode, showCreateForm: false }); await this.refreshRoom(); },
     async doJoinRoom() { await request_1.api.post(`/team-ledger/rooms/${this.data.roomCodeInput}/join`, {}); this.setData({ mode: "room", showJoinForm: false }); await this.refreshRoom(); },
     async addTempPlayer() { await request_1.api.post(`/team-ledger/rooms/${this.data.roomCodeInput}/add-temp`, { displayName: this.data.tempNameInput }); this.setData({ tempNameInput: "", showTempPlayerForm: false }); await this.refreshRoom(); },
-    async startRoom() { await request_1.api.post(`/team-ledger/rooms/${this.data.roomCodeInput}/start`, {}); await this.refreshRoom(); }, async nextHand() { await request_1.api.post(`/team-ledger/rooms/${this.data.roomCodeInput}/next-hand`, {}); await this.refreshRoom(); }, async setBuyIn() { await request_1.api.post(`/team-ledger/rooms/${this.data.roomCodeInput}/buy-in`, { buyInAmount: Number(this.data.myBuyIn) }); await this.refreshRoom(); },
+    async startRoom() { await request_1.api.post(`/team-ledger/rooms/${this.data.roomCodeInput}/start`, {}); await this.refreshRoom(); }, async nextHand() { await request_1.api.post(`/team-ledger/rooms/${this.data.roomCodeInput}/next-hand`, {}); await this.refreshRoom(); }, async setBuyIn() { const amount = Number(this.data.myBuyIn); if (!this.data.myBuyIn || !Number.isFinite(amount) || amount < 0) {
+        wx.showToast({ title: "请输入有效的带入金额", icon: "none" });
+        return;
+    } await request_1.api.post(`/team-ledger/rooms/${this.data.roomCodeInput}/buy-in`, { buyInAmount: amount }); wx.showToast({ title: "带入筹码已确认", icon: "success" }); await this.refreshRoom(); },
     async submitEntry() { const h = this.data.currentHand; if (!h)
         return; const n = this.data.myWinEntry ? Number(this.data.myWinEntry) : -Number(this.data.myLossEntry); await request_1.api.post(`/team-ledger/rooms/${this.data.roomCodeInput}/hands/${h.handNo}/entry`, { amount: n }); this.setData({ myWinEntry: "", myLossEntry: "" }); await this.refreshRoom(); await this.checkBalance(); },
     async checkBalance() { const h = this.data.currentHand; if (h)
-        this.setData({ balance: await request_1.api.get(`/team-ledger/rooms/${this.data.roomCodeInput}/hands/${h.handNo}/balance`) }); }, async requestConfirmation() { const h = this.data.currentHand; await request_1.api.post(`/team-ledger/rooms/${this.data.roomCodeInput}/hands/${h.handNo}/request-confirm`, {}); await this.refreshRoom(); }, async confirmHand() { const h = this.data.currentHand; await request_1.api.post(`/team-ledger/rooms/${this.data.roomCodeInput}/hands/${h.handNo}/confirm`, {}); await this.refreshRoom(); }, async disputeHand() { const h = this.data.currentHand; await request_1.api.post(`/team-ledger/rooms/${this.data.roomCodeInput}/hands/${h.handNo}/dispute`, { note: this.data.disputeNote }); await this.refreshRoom(); },
+        this.setData({ balance: await request_1.api.get(`/team-ledger/rooms/${this.data.roomCodeInput}/hands/${h.handNo}/balance`) }); }, async requestConfirmation() { const h = this.data.currentHand; await request_1.api.post(`/team-ledger/rooms/${this.data.roomCodeInput}/hands/${h.handNo}/request-confirm`, {}); await this.refreshRoom(); }, async confirmHand() { const h = this.data.currentHand; if (this.data.myConfirmed) {
+        wx.showToast({ title: "你已确认本手", icon: "none" });
+        return;
+    } await request_1.api.post(`/team-ledger/rooms/${this.data.roomCodeInput}/hands/${h.handNo}/confirm`, {}); this.setData({ myConfirmed: true, confirmationCount: Math.min(this.data.confirmationCount + 1, this.data.confirmationTotal) }); wx.showToast({ title: "本手已确认", icon: "success" }); await this.refreshRoom(); }, async disputeHand() { const h = this.data.currentHand; await request_1.api.post(`/team-ledger/rooms/${this.data.roomCodeInput}/hands/${h.handNo}/dispute`, { note: this.data.disputeNote }); await this.refreshRoom(); },
     async loadSummary() { this.setData({ summary: await request_1.api.get(`/team-ledger/rooms/${this.data.roomCodeInput}/summary`) }); }, async loadSettlement() { this.setData({ settlements: await request_1.api.post(`/team-ledger/rooms/${this.data.roomCodeInput}/settlement`, {}) }); }, async endRoom() { await request_1.api.post(`/team-ledger/rooms/${this.data.roomCodeInput}/end`, {}); await this.refreshRoom(); await this.loadSummary(); }, leaveRoom() { if (timer) {
         clearInterval(timer);
         timer = null;
