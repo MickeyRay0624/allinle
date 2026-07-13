@@ -11,6 +11,7 @@
     "pages/practice-solo/practice-solo",
     "pages/stats/stats",
     "pages/mine/mine",
+    "pages/profile-setup/profile-setup",
     "pages/dev/table-animation-demo/index"
   ],
   "window": {

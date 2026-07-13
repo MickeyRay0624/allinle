@@ -162,6 +162,7 @@ export async function switchDevLogin() {
 export const api = {
   get: <T = any>(url: string) => request<T>({ url }),
   post: <T = any>(url: string, data?: any) => request<T>({ url, method: "POST", data }),
+  patch: <T = any>(url: string, data?: any) => request<T>({ url, method: "PATCH", data }),
 };
 
 // Check if running in WeChat dev tools (development mode)

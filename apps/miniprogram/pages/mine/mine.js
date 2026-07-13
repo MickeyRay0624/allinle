@@ -24,6 +24,9 @@ Page({
         wx.showToast({ title: "已切换账号", icon: "success" });
         this.loadMe();
     },
+    editNickname() {
+        wx.navigateTo({ url: "/pages/profile-setup/profile-setup" });
+    },
     async loadMe() {
         try {
             const [user, teams] = await Promise.all([

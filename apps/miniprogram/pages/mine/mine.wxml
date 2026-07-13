@@ -5,6 +5,7 @@
   <view class="section card">
     <view class="card-title">{{user.nickname || '未登录'}}</view>
     <view class="card-desc">状态：{{user.status || '-'}}</view>
+    <t-button wx:if="{{user}}" variant="outline" block bindtap="editNickname">修改昵称</t-button>
 
     <!-- 仅开发版显示开发登录 -->
     <view wx:if="{{isDev}}">

@@ -27,17 +27,26 @@ export class UsersService {
   }
 
   async updateMe(userId: string, dto: UpdateMeDto) {
-    return this.prisma.user.update({
-      where: { id: userId },
-      data: dto,
-      select: {
-        id: true,
-        openid: true,
-        nickname: true,
-        avatarUrl: true,
-        status: true,
-        updatedAt: true
+    return this.prisma.$transaction(async (tx) => {
+      const user = await tx.user.update({
+        where: { id: userId },
+        data: dto,
+        select: {
+          id: true,
+          openid: true,
+          nickname: true,
+          avatarUrl: true,
+          status: true,
+          updatedAt: true
+        }
+      });
+      if (dto.nickname) {
+        await tx.teamLedgerParticipant.updateMany({
+          where: { userId },
+          data: { displayName: dto.nickname }
+        });
       }
+      return user;
     });
   }
 }

@@ -153,6 +153,7 @@ async function switchDevLogin() {
 exports.api = {
     get: (url) => request({ url }),
     post: (url, data) => request({ url, method: "POST", data }),
+    patch: (url, data) => request({ url, method: "PATCH", data }),
 };
 // Check if running in WeChat dev tools (development mode)
 function isDevVersion() {
