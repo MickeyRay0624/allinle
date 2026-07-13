@@ -165,6 +165,22 @@ export const api = {
   patch: <T = any>(url: string, data?: any) => request<T>({ url, method: "PATCH", data }),
 };
 
+export async function uploadAvatar(filePath: string): Promise<any> {
+  const token = getToken();
+  return new Promise((resolve, reject) => wx.uploadFile({
+    url: `${API_BASE}/users/me/avatar`, filePath, name: "file",
+    header: token ? { Authorization: `Bearer ${token}` } : {},
+    success: (res: any) => {
+      try {
+        const body = JSON.parse(res.data || "{}");
+        if (res.statusCode >= 200 && res.statusCode < 300) resolve(body.data !== undefined ? body.data : body);
+        else reject(new Error(body.message || "头像上传失败"));
+      } catch { reject(new Error("头像上传失败")); }
+    },
+    fail: (error: any) => reject(new Error(error.errMsg || "头像上传失败"))
+  }));
+}
+
 // Check if running in WeChat dev tools (development mode)
 export function isDevVersion(): boolean {
   try {

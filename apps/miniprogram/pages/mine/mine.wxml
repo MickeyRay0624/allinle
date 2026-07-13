@@ -3,6 +3,7 @@
   <view class="subtitle">用户信息、团队与合规声明</view>
 
   <view class="section card">
+    <image wx:if="{{user.avatarUrl}}" class="mine-avatar" src="{{user.avatarUrl}}" mode="aspectFill" />
     <view class="card-title">{{user.nickname || '未登录'}}</view>
     <view class="card-desc">状态：{{user.status || '-'}}</view>
     <t-button wx:if="{{user}}" variant="outline" block bindtap="editNickname">修改昵称</t-button>

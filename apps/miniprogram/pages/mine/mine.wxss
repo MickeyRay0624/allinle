@@ -4,3 +4,4 @@
 .button-gap {
   height: 16rpx;
 }
+.mine-avatar { width:128rpx; height:128rpx; display:block; margin:0 auto 20rpx; border-radius:50%; }

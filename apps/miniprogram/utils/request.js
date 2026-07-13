@@ -8,6 +8,7 @@ exports.wechatLogin = wechatLogin;
 exports.devLogin = devLogin;
 exports.ensureDevLogin = ensureDevLogin;
 exports.switchDevLogin = switchDevLogin;
+exports.uploadAvatar = uploadAvatar;
 exports.isDevVersion = isDevVersion;
 const API_BASE = "https://api.poker.lmqstudio.com/api";
 function usesLocalApi() {
@@ -155,6 +156,26 @@ exports.api = {
     post: (url, data) => request({ url, method: "POST", data }),
     patch: (url, data) => request({ url, method: "PATCH", data }),
 };
+async function uploadAvatar(filePath) {
+    const token = getToken();
+    return new Promise((resolve, reject) => wx.uploadFile({
+        url: `${API_BASE}/users/me/avatar`, filePath, name: "file",
+        header: token ? { Authorization: `Bearer ${token}` } : {},
+        success: (res) => {
+            try {
+                const body = JSON.parse(res.data || "{}");
+                if (res.statusCode >= 200 && res.statusCode < 300)
+                    resolve(body.data !== undefined ? body.data : body);
+                else
+                    reject(new Error(body.message || "头像上传失败"));
+            }
+            catch {
+                reject(new Error("头像上传失败"));
+            }
+        },
+        fail: (error) => reject(new Error(error.errMsg || "头像上传失败"))
+    }));
+}
 // Check if running in WeChat dev tools (development mode)
 function isDevVersion() {
     try {

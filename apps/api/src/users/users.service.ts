@@ -49,4 +49,13 @@ export class UsersService {
       return user;
     });
   }
+
+  async updateAvatar(userId: string, file?: Express.Multer.File) {
+    if (!file) throw new NotFoundException("请选择有效的头像图片");
+    const baseUrl = process.env.PUBLIC_BASE_URL || "https://api.poker.lmqstudio.com";
+    const avatarUrl = `${baseUrl}/uploads/${file.filename}`;
+    const user = await this.prisma.user.update({ where: { id: userId }, data: { avatarUrl }, select: { id: true, openid: true, nickname: true, avatarUrl: true, status: true, updatedAt: true } });
+    await this.prisma.teamLedgerParticipant.updateMany({ where: { userId }, data: { avatarUrl } });
+    return user;
+  }
 }

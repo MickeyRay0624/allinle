@@ -4,3 +4,7 @@
   font-size: 24rpx;
 }
 .profile-avatar { width: 120rpx; height: 120rpx; margin: 24rpx auto; display: block; border-radius: 50%; }
+.avatar-button,.nickname-input { margin: 18rpx 0; padding: 20rpx; border-radius: 8rpx; background:#fff; color:#111; font-size:28rpx; }
+.preset-row { display:flex; justify-content:space-between; margin:24rpx 0; }
+.preset-avatar { width:96rpx; height:96rpx; border-radius:50%; border:4rpx solid transparent; }
+.preset-avatar.selected { border-color:#f4d06f; }

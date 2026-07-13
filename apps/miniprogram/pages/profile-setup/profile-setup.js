@@ -7,6 +7,7 @@ Page({
         saving: false,
         avatarUrl: "",
         wechatId: "",
+        presetAvatars: [1, 2, 3, 4].map((n) => `https://api.poker.lmqstudio.com/assets/avatars/avatar-${n}.svg`),
     },
     onLoad() {
         const user = wx.getStorageSync("user") || {};
@@ -14,12 +15,28 @@ Page({
         const openid = String(user.openid || "");
         this.setData({ nickname, avatarUrl: user.avatarUrl || "", wechatId: openid ? `${openid.slice(0, 6)}…${openid.slice(-4)}` : "已通过微信认证" });
     },
-    useWechatProfile() {
-        wx.getUserProfile({
-            desc: "用于好友练习房展示昵称和头像",
-            success: (result) => this.setData({ nickname: result.userInfo?.nickName || this.data.nickname, avatarUrl: result.userInfo?.avatarUrl || "" }),
-            fail: () => wx.showToast({ title: "你可以继续使用自定义昵称", icon: "none" })
-        });
+    async onChooseAvatar(event) {
+        await this.uploadSelectedAvatar(event.detail.avatarUrl);
+    },
+    chooseCustomAvatar() {
+        wx.chooseMedia({ count: 1, mediaType: ["image"], sourceType: ["album", "camera"], success: (result) => this.uploadSelectedAvatar(result.tempFiles[0].tempFilePath) });
+    },
+    async uploadSelectedAvatar(filePath) {
+        try {
+            wx.showLoading({ title: "上传头像" });
+            const user = await (0, request_1.uploadAvatar)(filePath);
+            this.setData({ avatarUrl: user.avatarUrl });
+            wx.setStorageSync("user", user);
+        }
+        catch (error) {
+            wx.showToast({ title: error.message || "上传失败", icon: "none" });
+        }
+        finally {
+            wx.hideLoading();
+        }
+    },
+    selectPreset(event) {
+        this.setData({ avatarUrl: event.currentTarget.dataset.url });
     },
     onNicknameInput(event) {
         this.setData({ nickname: event.detail.value });

@@ -1,6 +1,8 @@
 import "reflect-metadata";
 import { BadRequestException, ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
+import { NestExpressApplication } from "@nestjs/platform-express";
+import { join } from "path";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import helmet from "helmet";
 import { ErrorCodes } from "@allinle/shared";
@@ -9,7 +11,9 @@ import { ApiExceptionFilter } from "./common/filters/api-exception.filter";
 import { ApiResponseInterceptor } from "./common/interceptors/api-response.interceptor";
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  app.useStaticAssets(join(process.cwd(), "apps/api/public"), { prefix: "/assets/" });
+  app.useStaticAssets(process.env.UPLOAD_DIR || join(process.cwd(), "uploads"), { prefix: "/uploads/" });
 
   // CORS
   const corsOrigin = process.env.CORS_ORIGIN;
