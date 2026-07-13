@@ -28,4 +28,27 @@ describe("TeamLedgerService balance", () => {
       allSubmitted: false
     });
   });
+
+  it("does not enter confirmation while a disputed participant has not resubmitted", async () => {
+    const update = vi.fn();
+    const service = new TeamLedgerService({
+      teamLedgerHand: {
+        findUnique: vi.fn().mockResolvedValue({
+          status: "OPEN",
+          entries: [
+            { participantId: "a", amount: new Prisma.Decimal(300), status: TeamLedgerEntryStatus.SUBMITTED },
+            { participantId: "b", amount: new Prisma.Decimal(-300), status: TeamLedgerEntryStatus.DISPUTED }
+          ]
+        }),
+        update
+      },
+      teamLedgerParticipant: {
+        findMany: vi.fn().mockResolvedValue([{ id: "a" }, { id: "b" }])
+      }
+    } as any);
+
+    await (service as any).autoPromote("hand-1", "room-1");
+
+    expect(update).not.toHaveBeenCalled();
+  });
 });
