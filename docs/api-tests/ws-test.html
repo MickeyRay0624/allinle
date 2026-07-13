@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ALLINLE WebSocket Test</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 24px;
+        color: #f5f5f5;
+        background: #080808;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      input,
+      button,
+      textarea {
+        box-sizing: border-box;
+        width: 100%;
+        margin: 8px 0 16px;
+        padding: 10px 12px;
+        color: #f5f5f5;
+        background: #151515;
+        border: 1px solid #333;
+        border-radius: 6px;
+      }
+
+      button {
+        width: auto;
+        color: #111;
+        background: #f4d06f;
+        border: 0;
+        cursor: pointer;
+      }
+
+      pre {
+        min-height: 240px;
+        padding: 16px;
+        overflow: auto;
+        background: #111;
+        border: 1px solid #333;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>ALLINLE WebSocket Test</h1>
+    <label>Socket URL</label>
+    <input id="url" value="http://localhost:3000/practice-room" />
+    <label>User Token</label>
+    <textarea id="token" rows="4"></textarea>
+    <label>Room Code</label>
+    <input id="roomCode" placeholder="ABC123" />
+    <button onclick="connect()">连接并 join_room</button>
+    <button onclick="emitEvent('confirm_initial_chips')">确认初始练习筹码</button>
+    <button onclick="emitEvent('player_ready', { readyStatus: true })">Ready</button>
+    <button onclick="emitEvent('start_room')">开始</button>
+    <pre id="log"></pre>
+
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+    <script>
+      let socket;
+      const log = (label, payload) => {
+        const el = document.getElementById("log");
+        el.textContent += `\n[${new Date().toLocaleTimeString()}] ${label}\n${JSON.stringify(payload, null, 2)}\n`;
+      };
+
+      function connect() {
+        const url = document.getElementById("url").value;
+        const token = document.getElementById("token").value.trim();
+        const roomCode = document.getElementById("roomCode").value.trim();
+        socket = io(url, {
+          transports: ["websocket"],
+          auth: { token }
+        });
+        [
+          "connect",
+          "room_state",
+          "player_joined",
+          "player_left",
+          "player_ready_changed",
+          "initial_chips_confirmed",
+          "room_ready",
+          "room_started",
+          "room_closed",
+          "error_message"
+        ].forEach((eventName) => socket.on(eventName, (payload) => log(eventName, payload)));
+        socket.on("connect", () => socket.emit("join_room", { roomCode }));
+      }
+
+      function emitEvent(eventName, extra = {}) {
+        const roomCode = document.getElementById("roomCode").value.trim();
+        socket.emit(eventName, { roomCode, ...extra });
+      }
+    </script>
+  </body>
+</html>

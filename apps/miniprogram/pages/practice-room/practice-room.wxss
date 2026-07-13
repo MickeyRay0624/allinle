@@ -1,0 +1,132 @@
+.row {
+  align-items: flex-start;
+}
+
+.table-panel {
+  background: #102016;
+  border-color: #294632;
+}
+
+.table-head,
+.seat-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.status-pill {
+  flex-shrink: 0;
+  padding: 8rpx 14rpx;
+  color: #0c0c0c;
+  font-size: 22rpx;
+  font-weight: 700;
+  background: #f4d06f;
+  border-radius: 8rpx;
+}
+
+.board {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-top: 24rpx;
+}
+
+.board.small {
+  margin-top: 10rpx;
+}
+
+.poker-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 76rpx;
+  height: 104rpx;
+  color: #101010;
+  font-size: 28rpx;
+  font-weight: 700;
+  background: #f7f1dc;
+  border: 2rpx solid #e0c779;
+  border-radius: 8rpx;
+}
+
+.poker-card.private {
+  background: #ffe6ec;
+  border-color: #ef8aa2;
+}
+
+.own-hand {
+  margin-top: 28rpx;
+}
+
+.player-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14rpx;
+  margin-top: 28rpx;
+}
+
+.seat {
+  min-height: 116rpx;
+  padding: 18rpx;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1rpx solid rgba(255, 255, 255, 0.12);
+  border-radius: 8rpx;
+}
+
+.seat-top {
+  color: #f4d06f;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
+.seat-name {
+  margin-top: 8rpx;
+  font-size: 26rpx;
+  color: #ffffff;
+}
+
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14rpx;
+  margin-top: 18rpx;
+}
+
+.action-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  height: 64rpx;
+  padding: 0 8rpx;
+  color: #111111;
+  font-size: 24rpx;
+  font-weight: 700;
+  line-height: 64rpx;
+  background: #f4f4f4;
+  border: 0;
+  border-radius: 8rpx;
+}
+
+.action-button::after {
+  border: 0;
+}
+
+.action-button.warning {
+  background: #f4d06f;
+}
+
+.action-button.danger {
+  color: #ffffff;
+  background: #e34d59;
+}
+
+.action-button[disabled] {
+  color: #777777;
+  background: #333333;
+}
+
+.replay-actions {
+  margin-top: 18rpx;
+}

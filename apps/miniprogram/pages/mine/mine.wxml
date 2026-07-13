@@ -1,0 +1,37 @@
+<view class="page">
+  <view class="title">我的</view>
+  <view class="subtitle">用户信息、团队与合规声明</view>
+
+  <view class="section card">
+    <view class="card-title">{{user.nickname || '未登录'}}</view>
+    <view class="card-desc">状态：{{user.status || '-'}}</view>
+
+    <!-- 仅开发版显示开发登录 -->
+    <view wx:if="{{isDev}}">
+      <t-button theme="warning" block bindtap="devLogin">开发环境登录</t-button>
+      <view class="button-gap"></view>
+      <t-button variant="outline" block bindtap="switchDevUser">切换测试账号</t-button>
+      <view class="button-gap"></view>
+      <t-button variant="outline" block bindtap="openAnimationDemo">🎴 动画演示页</t-button>
+      <view class="button-gap"></view>
+    </view>
+  </view>
+
+  <view class="section" wx:if="{{teams.length > 0}}">
+    <view class="card-title">我的团队</view>
+    <view wx:for="{{teams}}" wx:key="id" class="card">
+      <view class="card-title">{{item.name}}</view>
+      <view class="card-desc">成员 {{item.members ? item.members.length : 0}}</view>
+    </view>
+  </view>
+
+  <view class="section card">
+    <view class="card-title">使用说明</view>
+    <view class="card-desc">记账金额仅用于用户线下自行记录，不和线上模拟练习筹码打通。</view>
+  </view>
+
+  <view class="section card">
+    <view class="card-title">合规声明</view>
+    <view class="notice">{{notice}}</view>
+  </view>
+</view>

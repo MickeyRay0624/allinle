@@ -1,0 +1,46 @@
+<view class="page">
+  <view class="title">线上练习</view>
+  <view class="subtitle">非现金化训练房，只用于规则学习与牌技交流</view>
+
+  <view class="section card">
+    <view class="notice">{{notice}}</view>
+  </view>
+
+  <view class="section card">
+    <view class="card-title">好友练习房</view>
+    <view class="grid">
+      <view class="field">
+        <view class="label">人数</view>
+        <input class="input" type="number" value="{{playerCount}}" data-field="playerCount" bindinput="onInput" />
+      </view>
+      <view class="field">
+        <view class="label">小盲</view>
+        <input class="input" type="number" value="{{smallBlind}}" data-field="smallBlind" bindinput="onInput" />
+      </view>
+      <view class="field">
+        <view class="label">大盲</view>
+        <input class="input" type="number" value="{{bigBlind}}" data-field="bigBlind" bindinput="onInput" />
+      </view>
+      <view class="field">
+        <view class="label">初始练习筹码</view>
+        <input class="input" type="number" value="{{initialPracticeChips}}" data-field="initialPracticeChips" bindinput="onInput" />
+      </view>
+    </view>
+    <t-button theme="warning" block bindtap="createFriendsRoom">创建房间</t-button>
+  </view>
+
+  <view class="section card">
+    <view class="card-title">加入好友房</view>
+    <view class="field">
+      <view class="label">房间码</view>
+      <input class="input" value="{{roomCode}}" data-field="roomCode" bindinput="onInput" />
+    </view>
+    <t-button variant="outline" block bindtap="joinFriendsRoom">通过房间码加入</t-button>
+  </view>
+
+  <view class="section card">
+    <view class="card-title">单人机器人练习</view>
+    <view class="card-desc">选择机器人数量、难度、盲注和初始模拟练习筹码后直接开始</view>
+    <t-button theme="warning" block bindtap="openSolo">进入单人练习</t-button>
+  </view>
+</view>

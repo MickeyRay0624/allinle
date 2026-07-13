@@ -1,0 +1,30 @@
+.grid .card {
+  min-height: 160rpx;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18rpx;
+  margin-top: 20rpx;
+}
+
+.metric-item {
+  padding: 18rpx;
+  background: #101010;
+  border: 1rpx solid #2d2d2d;
+  border-radius: 8rpx;
+}
+
+.metric.small {
+  font-size: 30rpx;
+}
+
+.advice-card,
+.recent-card {
+  margin-top: 18rpx;
+}
+
+.between {
+  justify-content: space-between;
+}

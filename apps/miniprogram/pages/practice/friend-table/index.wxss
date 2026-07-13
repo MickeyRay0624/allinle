@@ -1,0 +1,354 @@
+.table-page {
+  min-height: 100vh;
+  background: #080808;
+  color: #f5f5f5;
+  display: flex;
+  flex-direction: column;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* ===== 顶部信息栏 ===== */
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16rpx 24rpx;
+  background: #0d0d0d;
+  border-bottom: 1rpx solid #1a1a1a;
+  flex-shrink: 0;
+}
+.header-left, .header-center, .header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rpx;
+}
+.header-room { font-size: 22rpx; color: #f4d06f; font-weight: 600; }
+.header-hand { font-size: 20rpx; color: #888; }
+.header-street { font-size: 24rpx; font-weight: 700; color: #f4d06f; }
+.header-pot { font-size: 20rpx; color: #aaa; }
+.header-blinds { font-size: 20rpx; color: #888; }
+.header-status { font-size: 16rpx; }
+.header-status.online { color: #5cb85c; }
+.header-status.offline { color: #e34d59; }
+
+/* ===== 牌桌区 ===== */
+.table-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16rpx 20rpx;
+  position: relative;
+  background: radial-gradient(ellipse at center, #1a2a1a 0%, #080808 70%);
+  border: 2rpx solid #1a3020;
+  border-radius: 32rpx;
+  margin: 12rpx;
+  min-height: 560rpx;
+}
+
+/* 公共牌 */
+.board-cards {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+  margin-bottom: 12rpx;
+}
+.board-label {
+  font-size: 20rpx;
+  color: #888;
+}
+.board-row {
+  display: flex;
+  gap: 12rpx;
+}
+
+/* 底池 */
+.pot-display {
+  margin-bottom: 16rpx;
+  padding: 8rpx 24rpx;
+  background: rgba(244, 208, 111, 0.12);
+  border-radius: 16rpx;
+  border: 1rpx solid rgba(244, 208, 111, 0.25);
+}
+.pot-amount {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #f4d06f;
+}
+
+/* ===== 玩家座位布局 ===== */
+.seat-layout {
+  width: 100%;
+  display: grid;
+  gap: 10rpx;
+  padding: 8rpx;
+}
+
+/* 2人: 上下各1 */
+.seat-count-2 {
+  grid-template-areas:
+    "top"
+    "bot";
+  grid-template-rows: 1fr 1fr;
+}
+.seat-count-2 .position-top { justify-self: center; }
+.seat-count-2 .position-bot { justify-self: center; }
+
+/* 3人: 上方2 下方1 */
+.seat-count-3 {
+  grid-template-areas:
+    "t0 t1"
+    "bot bot";
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+/* 4人: 上下各2 */
+.seat-count-4 {
+  grid-template-areas:
+    "t0 t1"
+    "b0 b1";
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+/* 5人: 上方3 下方2 */
+.seat-count-5 {
+  grid-template-areas:
+    "t0 t1 t2"
+    ". b0 b1";
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+/* 6人: 上方3 下方3 */
+.seat-count-6 {
+  grid-template-areas:
+    "t0 t1 t2"
+    "b0 b1 b2";
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+/* 7-9人: 椭圆分布 */
+.seat-count-7, .seat-count-8, .seat-count-9 {
+  grid-template-areas:
+    "t0 t1 t2"
+    "l0 . r0"
+    "b0 b1 b2";
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr;
+}
+
+/* ===== 单个座位 ===== */
+.seat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rpx;
+  padding: 10rpx;
+  background: rgba(0,0,0,0.3);
+  border: 1rpx solid rgba(255,255,255,0.08);
+  border-radius: 12rpx;
+  transition: all 0.3s ease;
+  position: relative;
+  min-width: 140rpx;
+}
+.seat.active-turn {
+  border-color: #f4d06f;
+  background: rgba(244, 208, 111, 0.08);
+  box-shadow: 0 0 20rpx rgba(244, 208, 111, 0.2);
+  animation: seatPulse 1.5s ease-in-out infinite;
+}
+.seat.current {
+  border-color: #5cb85c;
+}
+.seat.folded {
+  opacity: 0.45;
+}
+.seat.all-in {
+  border-color: #e34d59;
+}
+.seat.out {
+  opacity: 0.3;
+}
+.seat-cards {
+  display: flex;
+  gap: 6rpx;
+}
+.seat-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rpx;
+}
+.seat-name {
+  font-size: 22rpx;
+  color: #ddd;
+  max-width: 120rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.seat-chips {
+  font-size: 22rpx;
+  font-weight: 700;
+  color: #f4d06f;
+}
+.seat-badges {
+  display: flex;
+  gap: 6rpx;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.badge {
+  font-size: 18rpx;
+  font-weight: 700;
+  padding: 2rpx 8rpx;
+  border-radius: 6rpx;
+}
+.badge.dealer { background: #f4d06f; color: #0c0c0c; }
+.badge.thinking { background: transparent; color: #f4d06f; animation: dotsPulse 1s infinite; }
+.badge.folded-badge { background: rgba(255,255,255,0.1); color: #888; }
+.badge.allin-badge { background: #e34d59; color: #fff; }
+.badge.out-badge { background: #333; color: #666; }
+.badge.winner-badge { background: #f4d06f; color: #0c0c0c; animation: winnerGlow 0.8s ease-in-out infinite alternate; }
+
+/* 动作气泡 */
+.action-bubble {
+  position: absolute;
+  top: -28rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4rpx 14rpx;
+  border-radius: 8rpx;
+  font-size: 18rpx;
+  font-weight: 700;
+  white-space: nowrap;
+  animation: bubbleUp 1.5s ease-out forwards;
+}
+.action-bubble.Call, .action-bubble.Check { background: rgba(255,255,255,0.15); color: #ccc; }
+.action-bubble.Bet, .action-bubble.Raise { background: rgba(244,208,111,0.25); color: #f4d06f; }
+.action-bubble.Fold { background: rgba(255,255,255,0.08); color: #888; text-decoration: line-through; }
+.action-bubble.All-in { background: rgba(227,77,89,0.3); color: #e34d59; }
+
+/* ===== 我自己的区域 ===== */
+.my-area {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 24rpx;
+  background: #0d0d0d;
+  border-top: 1rpx solid #1a1a1a;
+  flex-shrink: 0;
+}
+.my-cards { display: flex; flex-direction: column; gap: 4rpx; }
+.my-label { font-size: 20rpx; color: #888; }
+.my-cards-row { display: flex; gap: 12rpx; }
+.my-chips { text-align: right; font-size: 20rpx; color: #888; }
+.chips-value { display: block; font-size: 32rpx; font-weight: 700; color: #f4d06f; }
+.my-turn-label {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #f4d06f;
+  padding: 8rpx 20rpx;
+  background: rgba(244,208,111,0.1);
+  border-radius: 8rpx;
+  animation: seatPulse 1.5s ease-in-out infinite;
+}
+.my-turn-label.waiting {
+  color: #888;
+  background: transparent;
+  animation: none;
+}
+
+/* ===== 操作区 ===== */
+.action-area {
+  padding: 16rpx 24rpx;
+  background: #0d0d0d;
+  flex-shrink: 0;
+}
+.action-input { margin-bottom: 12rpx; }
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10rpx;
+}
+.act-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 64rpx;
+  color: #111;
+  font-size: 24rpx;
+  font-weight: 700;
+  background: #e0e0e0;
+  border: 0;
+  border-radius: 8rpx;
+  padding: 0;
+}
+.act-btn::after { border: none; }
+.act-btn.bet { background: #f4d06f; }
+.act-btn.allin { background: #e34d59; color: #fff; }
+.act-btn[disabled] { background: #333; color: #666; }
+
+/* ===== 手牌结束 ===== */
+.hand-finished-area {
+  padding: 24rpx;
+  background: #0d0d0d;
+  flex-shrink: 0;
+}
+.finished-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #f4d06f;
+  text-align: center;
+  margin-bottom: 16rpx;
+}
+.winner-section { margin-bottom: 16rpx; }
+.pot-result {
+  padding: 12rpx;
+  margin-bottom: 10rpx;
+  background: rgba(255,255,255,0.03);
+  border-radius: 8rpx;
+}
+.pot-label { font-size: 24rpx; color: #f4d06f; margin-bottom: 6rpx; }
+.winner-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 22rpx;
+  color: #ddd;
+  padding: 4rpx 0;
+}
+.hand-desc { color: #f4d06f; font-style: italic; }
+.finished-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+/* ===== 动画 ===== */
+@keyframes seatPulse {
+  0%, 100% { box-shadow: 0 0 12rpx rgba(244,208,111,0.15); }
+  50% { box-shadow: 0 0 28rpx rgba(244,208,111,0.35); }
+}
+@keyframes dotsPulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+@keyframes winnerGlow {
+  0% { box-shadow: 0 0 8rpx rgba(244,208,111,0.3); }
+  100% { box-shadow: 0 0 24rpx rgba(244,208,111,0.7); }
+}
+@keyframes bubbleUp {
+  0% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-40rpx); }
+}
+.seat-invested {
+  font-size: 18rpx;
+  color: #e8b730;
+  margin-top: 2rpx;
+}

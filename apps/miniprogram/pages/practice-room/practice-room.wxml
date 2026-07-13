@@ -1,0 +1,103 @@
+<view class="page">
+  <view class="title">好友练习房</view>
+  <view class="subtitle">房间码 {{roomCode}} · {{connected ? '实时同步中' : '等待同步'}}</view>
+
+  <view wx:if="{{room}}" class="section card">
+    <view class="card-title">房间状态：{{room.status}}</view>
+    <view class="card-desc">盲注 {{room.smallBlind}} / {{room.bigBlind}} · 初始模拟练习筹码 {{room.initialPracticeChips}}</view>
+  </view>
+
+  <view wx:if="{{room}}" class="section">
+    <view class="card-title">成员</view>
+    <view wx:for="{{room.players}}" wx:key="id" class="card">
+      <view class="row">
+        <view class="metric">#{{item.seatNo}}</view>
+        <view>
+          <view class="card-title">{{item.nickname || '成员'}}</view>
+          <view class="card-desc">练习筹码 {{item.chips}}</view>
+          <view class="muted">筹码确认 {{item.initialChipsConfirmed ? '是' : '否'}} · 准备 {{item.readyStatus ? '是' : '否'}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{gameState}}" class="section card table-panel">
+    <view class="table-head">
+      <view>
+        <view class="card-title">第 {{gameState.handNo}} 手 · {{gameState.street}}</view>
+        <view class="card-desc">底池 {{gameState.pot}} · 当前下注 {{gameState.currentBet}} · 轮到 #{{gameState.currentTurnSeat || '-'}}</view>
+      </view>
+      <view class="status-pill">{{gameState.status}}</view>
+    </view>
+
+    <view class="board">
+      <view wx:for="{{gameState.boardCards}}" wx:key="*this" class="poker-card">{{item}}</view>
+    </view>
+
+    <view wx:if="{{privateState}}" class="own-hand">
+      <view class="muted">我的手牌</view>
+      <view class="board small">
+        <view wx:for="{{privateState.holeCards}}" wx:key="*this" class="poker-card private">{{item}}</view>
+      </view>
+    </view>
+
+    <view class="player-grid">
+      <view wx:for="{{gameState.players}}" wx:key="seatNo" class="seat">
+        <view class="seat-top">
+          <text>#{{item.seatNo}}</text>
+          <text>{{item.status}}</text>
+        </view>
+        <view class="seat-name">{{item.nickname}}</view>
+        <view class="muted">筹码 {{item.chips}} · 已投 {{item.investedThisHand}}</view>
+      </view>
+    </view>
+
+    <view wx:if="{{lastGameMessage}}" class="notice">{{lastGameMessage}}</view>
+  </view>
+
+  <view wx:if="{{gameState && gameState.status === 'PLAYING'}}" class="section card">
+    <view class="card-title">可行动作</view>
+    <view class="card-desc">
+      {{privateState && privateState.legalActions && privateState.legalActions.length ? '轮到你时按钮会亮起' : '当前等待其他座位行动'}}
+    </view>
+    <view class="field">
+      <view class="label">下注/加注数量</view>
+      <t-input value="{{actionAmount}}" type="number" placeholder="BET 或 RAISE 时填写" bindchange="onAmountChange" />
+    </view>
+    <view class="action-grid">
+      <button class="action-button" data-action="FOLD" bindtap="sendAction" disabled="{{acting || !legalActionMap.FOLD.enabled}}">{{legalActionMap.FOLD.label}}</button>
+      <button class="action-button" data-action="CHECK" bindtap="sendAction" disabled="{{acting || !legalActionMap.CHECK.enabled}}">{{legalActionMap.CHECK.label}}</button>
+      <button class="action-button" data-action="CALL" bindtap="sendAction" disabled="{{acting || !legalActionMap.CALL.enabled}}">{{legalActionMap.CALL.label}}</button>
+      <button class="action-button warning" data-action="BET" bindtap="sendAction" disabled="{{acting || !legalActionMap.BET.enabled}}">{{legalActionMap.BET.label}}</button>
+      <button class="action-button warning" data-action="RAISE" bindtap="sendAction" disabled="{{acting || !legalActionMap.RAISE.enabled}}">{{legalActionMap.RAISE.label}}</button>
+      <button class="action-button danger" data-action="ALL_IN" bindtap="sendAction" disabled="{{acting || !legalActionMap.ALL_IN.enabled}}">{{legalActionMap.ALL_IN.label}}</button>
+    </view>
+  </view>
+
+  <view wx:if="{{gameState && gameState.status === 'HAND_FINISHED'}}" class="section card">
+    <view class="card-title">本手已结束</view>
+    <view class="card-desc">房主可开始下一手，练习筹码仅用于本房间牌技训练。</view>
+    <view class="button-stack replay-actions">
+      <t-button variant="outline" block bindtap="viewReplay">查看本手复盘</t-button>
+      <t-button theme="warning" block bindtap="nextHand">开始下一手</t-button>
+    </view>
+  </view>
+
+  <view wx:if="{{room && (room.status === 'WAITING' || room.status === 'READY')}}" class="section card">
+    <view class="button-stack">
+      <t-button theme="warning" block bindtap="confirmInitialChips">确认初始模拟练习筹码</t-button>
+      <t-button theme="warning" block bindtap="ready">准备</t-button>
+      <t-button wx:if="{{room.status === 'READY'}}" variant="outline" block bindtap="startRoom">开始练习</t-button>
+      <t-button variant="outline" block bindtap="closeRoom">关闭房间</t-button>
+    </view>
+  </view>
+
+  <view wx:if="{{room && room.status !== 'WAITING' && room.status !== 'READY'}}" class="section card">
+    <view class="card-title">练习已开始</view>
+    <view class="card-desc">当前阶段不能再确认筹码或准备，请在牌桌区完成行动。</view>
+    <view class="button-stack">
+      <t-button variant="outline" block bindtap="endRoom">结束练习</t-button>
+      <t-button variant="outline" block bindtap="closeRoom">关闭房间</t-button>
+    </view>
+  </view>
+</view>

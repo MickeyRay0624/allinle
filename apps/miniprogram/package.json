@@ -1,0 +1,20 @@
+{
+  "name": "@allinle/miniprogram",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ALLINLE 微信小程序",
+  "scripts": {
+    "build:ts:local": "tsc -p tsconfig.json",
+    "build:npm:local": "rm -rf miniprogram_npm/tdesign-miniprogram miniprogram_npm/weapp.socket.io && mkdir -p miniprogram_npm/tdesign-miniprogram miniprogram_npm/weapp.socket.io && cp -R node_modules/tdesign-miniprogram/miniprogram_dist/. miniprogram_npm/tdesign-miniprogram/ && cp node_modules/weapp.socket.io/lib/weapp.socket.io.js miniprogram_npm/weapp.socket.io/index.js",
+    "build:local": "pnpm run build:ts:local && pnpm run build:npm:local",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "tdesign-miniprogram": "^1.6.0",
+    "weapp.socket.io": "^2.2.1"
+  },
+  "devDependencies": {
+    "miniprogram-api-typings": "^4.0.7",
+    "typescript": "^5.5.4"
+  }
+}

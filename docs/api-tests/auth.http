@@ -1,0 +1,34 @@
+@baseUrl = http://localhost:3000/api
+@token = 替换为你的用户 token
+
+### dev login A
+POST {{baseUrl}}/auth/dev-login
+Content-Type: application/json
+
+{
+  "openid": "dev_openid_a",
+  "nickname": "测试用户A"
+}
+
+### dev login B
+POST {{baseUrl}}/auth/dev-login
+Content-Type: application/json
+
+{
+  "openid": "dev_openid_b",
+  "nickname": "测试用户B"
+}
+
+### wx login placeholder
+POST {{baseUrl}}/auth/wx-login
+Content-Type: application/json
+
+{
+  "code": "mock-wx-code",
+  "nickname": "微信测试用户"
+}
+
+### me
+GET {{baseUrl}}/users/me
+Authorization: Bearer {{token}}
+

@@ -1,0 +1,72 @@
+<view class="page">
+  <view class="title">单人练习</view>
+  <view class="subtitle">和机器人进行非现金化牌技训练</view>
+
+  <view class="section panel">
+    <view class="panel-title">机器人数量</view>
+    <view class="option-grid">
+      <view
+        wx:for="{{botCounts}}"
+        wx:key="value"
+        class="option {{botCount === item.value ? 'active' : ''}}"
+        data-value="{{item.value}}"
+        bindtap="selectBotCount"
+      >
+        <view class="option-main">{{item.label}}</view>
+        <view class="option-sub">{{item.value}} 个机器人</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="section panel">
+    <view class="panel-title">机器人难度</view>
+    <view class="option-grid">
+      <view
+        wx:for="{{levels}}"
+        wx:key="value"
+        class="option {{botLevel === item.value ? 'active' : ''}}"
+        data-value="{{item.value}}"
+        bindtap="selectLevel"
+      >
+        <view class="option-main">{{item.label}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="section panel">
+    <view class="panel-title">初始模拟练习筹码</view>
+    <view class="option-grid">
+      <view
+        wx:for="{{chipOptions}}"
+        wx:key="*this"
+        class="option {{initialPracticeChips === item ? 'active' : ''}}"
+        data-value="{{item}}"
+        bindtap="selectChips"
+      >
+        <view class="option-main">{{item}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="section panel">
+    <view class="panel-title">盲注</view>
+    <view class="option-grid">
+      <view
+        wx:for="{{blindOptions}}"
+        wx:key="label"
+        class="option {{smallBlind === item.smallBlind && bigBlind === item.bigBlind ? 'active' : ''}}"
+        data-small="{{item.smallBlind}}"
+        data-big="{{item.bigBlind}}"
+        bindtap="selectBlinds"
+      >
+        <view class="option-main">{{item.label}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="section">
+    <t-button theme="warning" block bindtap="createSolo" disabled="{{creating}}">
+      {{creating ? '创建中' : '开始单人练习'}}
+    </t-button>
+  </view>
+</view>

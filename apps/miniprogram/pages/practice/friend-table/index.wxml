@@ -1,0 +1,154 @@
+<view class="table-page">
+  <!-- 顶部信息栏 -->
+  <view class="table-header">
+    <view class="header-left">
+      <text class="header-room">#{{roomCode}}</text>
+      <text class="header-hand" wx:if="{{gameState}}">第 {{gameState.handNo}} 手</text>
+    </view>
+    <view class="header-center">
+      <text class="header-street">{{streetLabel}}</text>
+      <text class="header-pot" wx:if="{{gameState}}">底池 {{gameState.pot}}</text>
+    </view>
+    <view class="header-right">
+      <text class="header-blinds" wx:if="{{room}}">{{room.smallBlind}}/{{room.bigBlind}}</text>
+      <text class="header-status {{connected ? 'online' : 'offline'}}">{{connected ? '●' : '○'}}</text>
+    </view>
+  </view>
+
+  <!-- 牌桌区 -->
+  <view class="table-area">
+    <!-- 公共牌 -->
+    <view class="board-cards">
+      <view class="board-label" wx:if="{{gameState && gameState.boardCards && gameState.boardCards.length > 0}}">公共牌</view>
+      <view class="board-row">
+        <poker-card
+          wx:for="{{displayBoardCards}}"
+          wx:key="index"
+          card="{{item.card}}"
+          faceDown="{{item.faceDown}}"
+          size="normal"
+          dealt="{{item.dealt}}"
+        />
+      </view>
+    </view>
+
+    <!-- 底池显示 -->
+    <view class="pot-display" wx:if="{{gameState && gameState.pot > 0}}">
+      <text class="pot-amount">{{gameState.pot}}</text>
+    </view>
+
+    <!-- 玩家座位 -->
+    <view class="seat-layout seat-count-{{playerCount}}">
+      <view
+        wx:for="{{seatPlayers}}"
+        wx:key="seatNo"
+        class="seat {{item.isCurrent ? 'current' : ''}} {{item.isTurn ? 'active-turn' : ''}} {{item.status === 'FOLDED' ? 'folded' : ''}} {{item.status === 'ALL_IN' ? 'all-in' : ''}} {{item.status === 'OUT' ? 'out' : ''}} position-{{item.position}}"
+      >
+        <!-- 手牌 -->
+        <view class="seat-cards">
+          <poker-card
+            wx:for="{{item.displayCards}}"
+            wx:for-item="card"
+            wx:key="index"
+            card="{{card.card}}"
+            faceDown="{{card.faceDown}}"
+            size="small"
+            faded="{{item.status === 'FOLDED' || item.status === 'OUT'}}"
+            highlight="{{item.isWinner}}"
+          />
+        </view>
+
+        <!-- 玩家信息 -->
+        <view class="seat-info">
+          <text class="seat-name">{{item.nickname || '成员'}}</text>
+          <text class="seat-chips">{{item.chips}}</text>
+          <text wx:if="{{item.invested > 0}}" class="seat-invested">本轮已下 {{item.invested}}</text>
+        </view>
+
+        <!-- 状态标签 -->
+        <view class="seat-badges">
+          <text wx:if="{{item.isDealer}}" class="badge dealer">D</text>
+          <text wx:if="{{item.isTurn && !item.isCurrent}}" class="badge thinking">...</text>
+          <text wx:if="{{item.status === 'FOLDED'}}" class="badge folded-badge">弃牌</text>
+          <text wx:if="{{item.status === 'ALL_IN'}}" class="badge allin-badge">ALL-IN</text>
+          <text wx:if="{{item.status === 'OUT'}}" class="badge out-badge">出局</text>
+          <text wx:if="{{item.isWinner}}" class="badge winner-badge">WIN</text>
+        </view>
+
+        <!-- 动作气泡 -->
+        <view wx:if="{{item.lastAction}}" class="action-bubble {{item.lastAction}}">
+          {{item.lastAction}}
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 我的手牌和状态 -->
+  <view class="my-area" wx:if="{{privateState}}">
+    <view class="my-cards">
+      <text class="my-label">我的手牌</text>
+      <view class="my-cards-row">
+        <poker-card
+          wx:for="{{privateState.holeCards}}"
+          wx:key="*this"
+          card="{{item}}"
+          size="large"
+          highlight="{{privateState.status === 'ACTIVE' && gameState && gameState.currentTurnSeat === privateState.seatNo}}"
+        />
+      </view>
+    </view>
+    <view class="my-chips">
+      <text>剩余筹码</text>
+      <text class="chips-value">{{privateState.chips}}</text>
+    </view>
+    <view class="my-turn-label" wx:if="{{isMyTurn}}">
+      ⏳ 轮到你行动
+    </view>
+    <view class="my-turn-label waiting" wx:elif="{{gameState && gameState.status === 'PLAYING' && !isMyTurn}}">
+      等待 {{currentTurnNickname || '其他玩家'}} 行动
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-area" wx:if="{{isMyTurn && gameState && gameState.status === 'PLAYING'}}">
+    <view class="action-input" wx:if="{{legalActionMap.BET.enabled || legalActionMap.RAISE.enabled}}">
+      <t-input value="{{actionAmount}}" type="number" placeholder="下注/加注数量" bindchange="onAmountChange" />
+    </view>
+    <view class="action-grid">
+      <button class="act-btn" data-action="FOLD" bindtap="sendAction" disabled="{{!legalActionMap.FOLD.enabled}}">Fold</button>
+      <button class="act-btn" data-action="CHECK" bindtap="sendAction" disabled="{{!legalActionMap.CHECK.enabled}}">Check</button>
+      <button class="act-btn" data-action="CALL" bindtap="sendAction" disabled="{{!legalActionMap.CALL.enabled}}">{{legalActionMap.CALL.label || 'Call'}}</button>
+      <button class="act-btn bet" data-action="BET" bindtap="sendAction" disabled="{{!legalActionMap.BET.enabled}}">{{legalActionMap.BET.label || 'Bet'}}</button>
+      <button class="act-btn bet" data-action="RAISE" bindtap="sendAction" disabled="{{!legalActionMap.RAISE.enabled}}">{{legalActionMap.RAISE.label || 'Raise'}}</button>
+      <button class="act-btn allin" data-action="ALL_IN" bindtap="sendAction" disabled="{{!legalActionMap.ALL_IN.enabled}}">All-in</button>
+    </view>
+  </view>
+
+  <!-- 手牌结束 -->
+  <view class="hand-finished-area" wx:if="{{gameState && gameState.status === 'HAND_FINISHED'}}">
+    <view class="finished-title">本手结束</view>
+    <view wx:if="{{winnerInfo}}" class="winner-section">
+      <view wx:for="{{winnerInfo.pots}}" wx:key="index" wx:for-item="pot" class="pot-result">
+        <view class="pot-label">底池 {{pot.amount}}</view>
+        <view wx:for="{{pot.winners}}" wx:key="seatNo" wx:for-item="w" class="winner-row">
+          <text>#{{w.seatNo}} {{w.userId === userId ? '你' : ''}} 获得 {{w.amountWon}}</text>
+          <text wx:if="{{w.description}}" class="hand-desc">{{w.description}}</text>
+        </view>
+      </view>
+    </view>
+    <view class="finished-actions">
+      <t-button variant="outline" block bindtap="viewReplay">查看复盘</t-button>
+      <t-button wx:if="{{isOwner}}" theme="warning" block bindtap="nextHand">开始下一手</t-button>
+      <t-button wx:else block disabled>等待房主开始下一手</t-button>
+      <t-button variant="outline" block bindtap="leaveTable">退出牌桌</t-button>
+    </view>
+  </view>
+
+  <!-- 房间结束 -->
+  <view class="hand-finished-area" wx:if="{{room && room.status === 'FINISHED'}}">
+    <view class="finished-title">练习房已结束</view>
+    <view class="finished-actions">
+      <t-button variant="outline" block bindtap="leaveTable">返回</t-button>
+    </view>
+  </view>
+</view>

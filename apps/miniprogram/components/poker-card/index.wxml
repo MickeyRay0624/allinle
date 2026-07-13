@@ -1,0 +1,20 @@
+<view class="card-wrapper size-{{size}} {{highlight ? 'highlight' : ''}} {{faded ? 'faded' : ''}} {{_dealt ? 'dealt' : ''}}">
+  <view wx:if="{{faceDown}}" class="card card-back">
+    <view class="card-back-pattern">
+      <view class="back-diamond"></view>
+    </view>
+  </view>
+  <view wx:else class="card card-face">
+    <view class="card-corner top-left">
+      <text class="card-rank" style="color:{{color}}">{{rank}}</text>
+      <text class="card-suit" style="color:{{color}}">{{symbol}}</text>
+    </view>
+    <view class="card-center">
+      <text class="card-center-suit" style="color:{{color}}">{{symbol}}</text>
+    </view>
+    <view class="card-corner bottom-right">
+      <text class="card-rank" style="color:{{color}}">{{rank}}</text>
+      <text class="card-suit" style="color:{{color}}">{{symbol}}</text>
+    </view>
+  </view>
+</view>

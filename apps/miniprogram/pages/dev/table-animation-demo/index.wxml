@@ -1,0 +1,48 @@
+<view class="page">
+  <view class="title">牌桌动画演示</view>
+  <view class="subtitle">仅开发环境可见，不连接真实房间</view>
+
+  <!-- 人数选择 -->
+  <view class="section">
+    <view class="card-title">桌型</view>
+    <view class="chip-row">
+      <view wx:for="{{tableSizes}}" wx:key="*this" class="chip {{demoPlayers === item ? 'active' : ''}}" data-size="{{item}}" bindtap="setTableSize">{{item}}人桌</view>
+    </view>
+  </view>
+
+  <!-- 动画触发 -->
+  <view class="section">
+    <view class="card-title">触发动画</view>
+    <view class="action-grid">
+      <button wx:for="{{demoActions}}" wx:key="key" class="act-btn" data-key="{{item.key}}" bindtap="triggerDemo">{{item.label}}</button>
+    </view>
+  </view>
+
+  <!-- 演示牌桌 -->
+  <view class="demo-table">
+    <!-- 公共牌 -->
+    <view class="board-row">
+      <poker-card wx:for="{{demoBoard}}" wx:key="index" card="{{item.card}}" faceDown="{{item.faceDown}}" size="normal" dealt="{{item.dealt}}" />
+    </view>
+
+    <!-- 底池 -->
+    <view class="pot" wx:if="{{demoPot > 0}}">底池 {{demoPot}}</view>
+
+    <!-- 座位 -->
+    <view class="demo-seats count-{{demoPlayers}}">
+      <view wx:for="{{demoSeats}}" wx:key="index" class="demo-seat {{item.highlight ? 'active' : ''}} {{item.folded ? 'folded' : ''}} {{item.allIn ? 'allin' : ''}}">
+        <view class="seat-cards-row">
+          <poker-card wx:for="{{item.cards}}" wx:for-item="c" wx:key="cIdx" card="{{c.card}}" faceDown="{{c.faceDown}}" size="small" faded="{{item.folded}}" highlight="{{item.winner}}" />
+        </view>
+        <text class="seat-label">{{item.label}}</text>
+        <text class="seat-chips">{{item.chips}}</text>
+        <text wx:if="{{item.badge}}" class="seat-badge">{{item.badge}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 重置 -->
+  <view class="section">
+    <t-button variant="outline" block bindtap="resetDemo">重置演示</t-button>
+  </view>
+</view>

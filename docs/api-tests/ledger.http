@@ -1,0 +1,83 @@
+@baseUrl = http://localhost:3000/api
+@token = 替换为你的用户 token
+@gameId = 替换为创建牌局返回的 id
+@playerId = 替换为添加玩家返回列表中的 players[0].id
+@teamId = seed_team_allinle
+
+### create personal ledger game
+POST {{baseUrl}}/ledger/games
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "type": "PERSONAL",
+  "title": "周末练习局",
+  "blindLevel": "1/2",
+  "gameDate": "2026-07-07",
+  "note": "个人记录"
+}
+
+### add player
+POST {{baseUrl}}/ledger/games/{{gameId}}/players
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "displayName": "我"
+}
+
+### add buy in
+POST {{baseUrl}}/ledger/games/{{gameId}}/transactions
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "playerId": "{{playerId}}",
+  "type": "BUY_IN",
+  "amount": 1000,
+  "note": "初始买入"
+}
+
+### add cash out
+POST {{baseUrl}}/ledger/games/{{gameId}}/transactions
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "playerId": "{{playerId}}",
+  "type": "CASH_OUT",
+  "amount": 1500,
+  "note": "结束带出"
+}
+
+### finish game
+POST {{baseUrl}}/ledger/games/{{gameId}}/finish
+Authorization: Bearer {{token}}
+
+### confirm game
+POST {{baseUrl}}/ledger/games/{{gameId}}/confirm
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "note": "确认无误"
+}
+
+### create team ledger game
+POST {{baseUrl}}/ledger/games
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "type": "TEAM",
+  "teamId": "{{teamId}}",
+  "title": "团队记账测试",
+  "blindLevel": "1/2",
+  "gameDate": "2026-07-07",
+  "note": "团队记录"
+}
+
+### list ledger games
+GET {{baseUrl}}/ledger/games
+Authorization: Bearer {{token}}
+

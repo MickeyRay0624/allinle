@@ -1,0 +1,45 @@
+<view class="page">
+  <view class="title">个人记账</view>
+  <view class="subtitle">线下账目记录，金额不与任何练习筹码打通</view>
+
+  <view class="section card">
+    <view class="field">
+      <view class="label">标题</view>
+      <input class="input" value="{{title}}" data-field="title" bindinput="onInput" />
+    </view>
+    <view class="grid">
+      <view class="field">
+        <view class="label">盲注级别</view>
+        <input class="input" value="{{blindLevel}}" data-field="blindLevel" bindinput="onInput" />
+      </view>
+      <view class="field">
+        <view class="label">时长（分钟）</view>
+        <input class="input" type="number" value="{{durationMinutes}}" data-field="durationMinutes" bindinput="onInput" />
+      </view>
+      <view class="field">
+        <view class="label">买入金额</view>
+        <input class="input" type="digit" value="{{buyIn}}" data-field="buyIn" bindinput="onInput" />
+      </view>
+      <view class="field">
+        <view class="label">带出金额</view>
+        <input class="input" type="digit" value="{{cashOut}}" data-field="cashOut" bindinput="onInput" />
+      </view>
+    </view>
+    <view class="field">
+      <view class="label">备注</view>
+      <textarea class="textarea" value="{{note}}" data-field="note" bindinput="onInput" />
+    </view>
+    <view class="card-desc">自动计算盈亏</view>
+    <view class="metric">{{profit}}</view>
+    <t-button theme="warning" block bindtap="saveGame">保存记录</t-button>
+  </view>
+
+  <view class="section">
+    <view class="card-title">历史记录</view>
+    <view wx:for="{{games}}" wx:key="id" class="card">
+      <view class="card-title">{{item.title}}</view>
+      <view class="card-desc">买入 {{item.totalBuyIn}} / 带出 {{item.totalCashOut}} / 盈亏 {{item.totalProfit}}</view>
+      <view class="muted">{{item.status}}</view>
+    </view>
+  </view>
+</view>

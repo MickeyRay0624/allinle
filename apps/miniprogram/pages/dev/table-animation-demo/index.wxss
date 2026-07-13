@@ -1,0 +1,121 @@
+.chip-row {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 16rpx;
+  flex-wrap: wrap;
+}
+.chip {
+  padding: 10rpx 24rpx;
+  background: #1a1a1a;
+  border: 1rpx solid #333;
+  border-radius: 32rpx;
+  font-size: 24rpx;
+  color: #aaa;
+}
+.chip.active {
+  background: #f4d06f22;
+  border-color: #f4d06f;
+  color: #f4d06f;
+  font-weight: 700;
+}
+
+.demo-table {
+  margin: 24rpx 0;
+  padding: 24rpx;
+  background: radial-gradient(ellipse at center, #1a2a1a 0%, #080808 70%);
+  border: 2rpx solid #1a3020;
+  border-radius: 32rpx;
+  min-height: 500rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.board-row {
+  display: flex;
+  gap: 10rpx;
+  margin-bottom: 12rpx;
+}
+.pot {
+  padding: 6rpx 20rpx;
+  background: rgba(244,208,111,0.12);
+  border-radius: 12rpx;
+  color: #f4d06f;
+  font-weight: 700;
+  font-size: 24rpx;
+  margin-bottom: 16rpx;
+}
+
+.demo-seats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14rpx;
+  justify-content: center;
+  width: 100%;
+}
+.demo-seats.count-2 .demo-seat { flex: 0 0 calc(50% - 14rpx); }
+.demo-seats.count-4 .demo-seat { flex: 0 0 calc(50% - 14rpx); }
+.demo-seats.count-6 .demo-seat { flex: 0 0 calc(33% - 14rpx); }
+.demo-seats.count-9 .demo-seat { flex: 0 0 calc(33% - 14rpx); }
+
+.demo-seat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rpx;
+  padding: 10rpx;
+  background: rgba(0,0,0,0.3);
+  border: 1rpx solid rgba(255,255,255,0.08);
+  border-radius: 10rpx;
+  transition: all 0.3s;
+}
+.demo-seat.active {
+  border-color: #f4d06f;
+  box-shadow: 0 0 16rpx rgba(244,208,111,0.25);
+  animation: seatPulse 1.5s ease-in-out infinite;
+}
+.demo-seat.folded {
+  opacity: 0.4;
+}
+.demo-seat.allin {
+  border-color: #e34d59;
+}
+.seat-cards-row {
+  display: flex;
+  gap: 4rpx;
+}
+.seat-label {
+  font-size: 20rpx;
+  color: #ccc;
+}
+.seat-chips {
+  font-size: 20rpx;
+  font-weight: 700;
+  color: #f4d06f;
+}
+.seat-badge {
+  font-size: 16rpx;
+  font-weight: 700;
+  padding: 2rpx 8rpx;
+  border-radius: 4rpx;
+  background: #f4d06f;
+  color: #0c0c0c;
+}
+
+.act-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 56rpx;
+  color: #ccc;
+  font-size: 22rpx;
+  background: #1a1a1a;
+  border: 1rpx solid #333;
+  border-radius: 8rpx;
+  padding: 0 12rpx;
+}
+.act-btn::after { border: none; }
+
+@keyframes seatPulse {
+  0%, 100% { box-shadow: 0 0 8rpx rgba(244,208,111,0.12); }
+  50% { box-shadow: 0 0 22rpx rgba(244,208,111,0.3); }
+}

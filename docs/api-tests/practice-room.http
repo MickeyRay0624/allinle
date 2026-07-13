@@ -1,0 +1,49 @@
+@baseUrl = http://localhost:3000/api
+@token = 替换为你的用户 token
+@roomCode = 替换为创建房间返回的 roomCode
+
+### create friends practice room
+POST {{baseUrl}}/practice/rooms
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "mode": "FRIENDS",
+  "playerCount": 6,
+  "smallBlind": 5,
+  "bigBlind": 10,
+  "initialPracticeChips": 2000
+}
+
+### get room
+GET {{baseUrl}}/practice/rooms/{{roomCode}}
+Authorization: Bearer {{token}}
+
+### join room
+POST {{baseUrl}}/practice/rooms/{{roomCode}}/join
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{}
+
+### confirm initial chips
+POST {{baseUrl}}/practice/rooms/{{roomCode}}/confirm-initial-chips
+Authorization: Bearer {{token}}
+
+### ready
+POST {{baseUrl}}/practice/rooms/{{roomCode}}/ready
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "readyStatus": true
+}
+
+### start room
+POST {{baseUrl}}/practice/rooms/{{roomCode}}/start
+Authorization: Bearer {{token}}
+
+### close room
+POST {{baseUrl}}/practice/rooms/{{roomCode}}/close
+Authorization: Bearer {{token}}
+

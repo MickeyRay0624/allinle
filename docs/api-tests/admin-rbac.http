@@ -1,0 +1,51 @@
+### Admin RBAC API Tests
+
+### 1. Admin Login
+POST http://localhost:3000/api/admin/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123456"
+}
+
+### 2. Get Current Admin
+GET http://localhost:3000/api/admin/auth/me
+Authorization: Bearer YOUR_ADMIN_TOKEN
+
+### 3. Create Admin User (SUPER_ADMIN only)
+POST http://localhost:3000/api/admin/users/admins
+Authorization: Bearer YOUR_ADMIN_TOKEN
+Content-Type: application/json
+
+{
+  "username": "new_admin",
+  "password": "secure_password",
+  "role": "ADMIN"
+}
+
+### 4. List Admin Users
+GET http://localhost:3000/api/admin/users/admins
+Authorization: Bearer YOUR_ADMIN_TOKEN
+
+### 5. Reset Admin Password (SUPER_ADMIN only)
+PATCH http://localhost:3000/api/admin/users/admins/ADMIN_ID/password
+Authorization: Bearer YOUR_ADMIN_TOKEN
+Content-Type: application/json
+
+{
+  "newPassword": "new_secure_password"
+}
+
+### 6. Update Admin Status (SUPER_ADMIN only)
+PATCH http://localhost:3000/api/admin/users/admins/ADMIN_ID/status
+Authorization: Bearer YOUR_ADMIN_TOKEN
+Content-Type: application/json
+
+{
+  "status": "DISABLED"
+}
+
+### 7. Get Audit Logs
+GET http://localhost:3000/api/admin/audit-logs
+Authorization: Bearer YOUR_ADMIN_TOKEN

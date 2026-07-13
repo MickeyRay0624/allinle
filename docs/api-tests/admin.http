@@ -1,0 +1,51 @@
+@baseUrl = http://localhost:3000/api
+@adminToken = 替换为你的管理员 token
+@userId = 替换为用户 id
+@roomId = 替换为练习房 id
+
+### admin login
+POST {{baseUrl}}/admin/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123456"
+}
+
+### dashboard
+GET {{baseUrl}}/admin/dashboard
+Authorization: Bearer {{adminToken}}
+
+### users
+GET {{baseUrl}}/admin/users
+Authorization: Bearer {{adminToken}}
+
+### update user status
+PATCH {{baseUrl}}/admin/users/{{userId}}/status
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "status": "NORMAL"
+}
+
+### ledger games
+GET {{baseUrl}}/admin/ledger-games
+Authorization: Bearer {{adminToken}}
+
+### practice rooms
+GET {{baseUrl}}/admin/practice-rooms
+Authorization: Bearer {{adminToken}}
+
+### close practice room
+POST {{baseUrl}}/admin/practice-rooms/{{roomId}}/close
+Authorization: Bearer {{adminToken}}
+
+### risk logs
+GET {{baseUrl}}/admin/risk-logs
+Authorization: Bearer {{adminToken}}
+
+### system config
+GET {{baseUrl}}/admin/system-config
+Authorization: Bearer {{adminToken}}
+

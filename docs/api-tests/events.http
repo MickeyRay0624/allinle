@@ -1,0 +1,36 @@
+### Event Tracking API
+
+### 1. Track Event (unauthenticated)
+POST http://localhost:3000/api/events/track
+Content-Type: application/json
+
+{
+  "eventName": "page_view",
+  "eventGroup": "miniprogram",
+  "metadata": {
+    "page": "/pages/index/index",
+    "source": "app_launch"
+  }
+}
+
+### 2. Track Event (authenticated)
+POST http://localhost:3000/api/events/track
+Authorization: Bearer YOUR_USER_TOKEN
+Content-Type: application/json
+
+{
+  "eventName": "practice_room_create",
+  "eventGroup": "practice",
+  "metadata": {
+    "playerCount": 6,
+    "blindLevel": "50/100"
+  }
+}
+
+### 3. Admin List Events
+GET http://localhost:3000/api/events?take=20
+Authorization: Bearer YOUR_ADMIN_TOKEN
+
+### 4. Admin List Events by Group
+GET http://localhost:3000/api/events?eventGroup=practice&take=20
+Authorization: Bearer YOUR_ADMIN_TOKEN

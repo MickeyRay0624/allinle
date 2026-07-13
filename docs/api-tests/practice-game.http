@@ -1,0 +1,92 @@
+@baseUrl = http://localhost:3000/api
+@tokenA = 替换为房主用户 token
+@tokenB = 替换为玩家B用户 token
+@roomCode = 替换为练习房 roomCode
+@handId = 替换为手牌 id
+
+### get current server-authoritative game state
+GET {{baseUrl}}/practice/rooms/{{roomCode}}/game-state
+Authorization: Bearer {{tokenA}}
+
+### start first hand
+POST {{baseUrl}}/practice/rooms/{{roomCode}}/start
+Authorization: Bearer {{tokenA}}
+
+### player action: call
+POST {{baseUrl}}/practice/rooms/{{roomCode}}/actions
+Authorization: Bearer {{tokenA}}
+Content-Type: application/json
+
+{
+  "actionType": "CALL"
+}
+
+### player action: check
+POST {{baseUrl}}/practice/rooms/{{roomCode}}/actions
+Authorization: Bearer {{tokenB}}
+Content-Type: application/json
+
+{
+  "actionType": "CHECK"
+}
+
+### player action: bet
+POST {{baseUrl}}/practice/rooms/{{roomCode}}/actions
+Authorization: Bearer {{tokenA}}
+Content-Type: application/json
+
+{
+  "actionType": "BET",
+  "amount": 50
+}
+
+### player action: raise to amount
+POST {{baseUrl}}/practice/rooms/{{roomCode}}/actions
+Authorization: Bearer {{tokenB}}
+Content-Type: application/json
+
+{
+  "actionType": "RAISE",
+  "amount": 150
+}
+
+### player action: all-in
+POST {{baseUrl}}/practice/rooms/{{roomCode}}/actions
+Authorization: Bearer {{tokenA}}
+Content-Type: application/json
+
+{
+  "actionType": "ALL_IN"
+}
+
+### start next hand after HAND_FINISHED
+POST {{baseUrl}}/practice/rooms/{{roomCode}}/next-hand
+Authorization: Bearer {{tokenA}}
+
+### end room normally
+POST {{baseUrl}}/practice/rooms/{{roomCode}}/end
+Authorization: Bearer {{tokenA}}
+
+### list room hand records
+GET {{baseUrl}}/practice/rooms/{{roomCode}}/hands
+Authorization: Bearer {{tokenA}}
+
+### get latest hand replay
+GET {{baseUrl}}/practice/rooms/{{roomCode}}/latest-hand-replay
+Authorization: Bearer {{tokenA}}
+
+### get room stats
+GET {{baseUrl}}/practice/rooms/{{roomCode}}/stats
+Authorization: Bearer {{tokenA}}
+
+### get raw hand record
+GET {{baseUrl}}/practice/hands/{{handId}}
+Authorization: Bearer {{tokenA}}
+
+### get sanitized hand replay
+GET {{baseUrl}}/practice/hands/{{handId}}/replay
+Authorization: Bearer {{tokenA}}
+
+### admin list practice hands
+GET {{baseUrl}}/admin/practice-hands
+Authorization: Bearer 替换为管理员 token

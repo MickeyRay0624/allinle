@@ -1,0 +1,226 @@
+### Team Ledger API Tests
+### Prerequisites: API running on port 3000, dev login enabled
+
+### 1. User A dev-login
+POST http://localhost:3000/api/auth/dev-login
+Content-Type: application/json
+
+{
+  "openid": "dev_user_a_001",
+  "nickname": "玩家A"
+}
+
+### 2. User B dev-login
+POST http://localhost:3000/api/auth/dev-login
+Content-Type: application/json
+
+{
+  "openid": "dev_user_b_002",
+  "nickname": "玩家B"
+}
+
+### 3. User C dev-login
+POST http://localhost:3000/api/auth/dev-login
+Content-Type: application/json
+
+{
+  "openid": "dev_user_c_003",
+  "nickname": "玩家C"
+}
+
+### ==========================================
+### Use User A's token below
+### ==========================================
+
+@token_a = <user_a_jwt_token>
+
+### 4. User A creates a team ledger room
+POST http://localhost:3000/api/team-ledger/rooms
+Content-Type: application/json
+Authorization: Bearer {{token_a}}
+
+{
+  "title": "周末线下牌局"
+}
+
+### Response: get roomCode from response
+@roomCode = <roomCode>
+
+### 5. User B joins the room
+POST http://localhost:3000/api/team-ledger/rooms/{{roomCode}}/join
+Content-Type: application/json
+Authorization: Bearer {{token_b}}
+
+{}
+
+### 6. User C joins the room
+POST http://localhost:3000/api/team-ledger/rooms/{{roomCode}}/join
+Content-Type: application/json
+Authorization: Bearer {{token_c}}
+
+{}
+
+### 7. Owner adds a temp player (现场玩家D)
+POST http://localhost:3000/api/team-ledger/rooms/{{roomCode}}/add-temp
+Content-Type: application/json
+Authorization: Bearer {{token_a}}
+
+{
+  "displayName": "现场玩家D"
+}
+
+### 8. Get room details
+GET http://localhost:3000/api/team-ledger/rooms/{{roomCode}}
+Authorization: Bearer {{token_a}}
+
+### 9. Owner starts the ledger room
+POST http://localhost:3000/api/team-ledger/rooms/{{roomCode}}/start
+Authorization: Bearer {{token_a}}
+
+### ==========================================
+### Hand #1
+### ==========================================
+
+### 10. User A submits entry: +300
+POST http://localhost:3000/api/team-ledger/rooms/{{roomCode}}/hands/1/entry
+Content-Type: application/json
+Authorization: Bearer {{token_a}}
+
+{
+  "amount": 300
+}
+
+### 11. User B submits entry: -100
+POST http://localhost:3000/api/team-ledger/rooms/{{roomCode}}/hands/1/entry
+Content-Type: application/json
+Authorization: Bearer {{token_b}}
+
+{
+  "amount": -100
+}
+
+### 12. User C submits entry: -200
+POST http://localhost:3000/api/team-ledger/rooms/{{roomCode}}/hands/1/entry
+Content-Type: application/json
+Authorization: Bearer {{token_c}}
+
+{
+  "amount": -200
+}
+
+### 13. Check balance (should be 0, balanced)
+GET http://localhost:3000/api/team-ledger/rooms/{{roomCode}}/hands/1/balance
+Authorization: Bearer {{token_a}}
+
+### 14. Owner requests confirmation
+POST http://localhost:3000/api/team-ledger/rooms/{{roomCode}}/hands/1/request-confirm
+Authorization: Bearer {{token_a}}
+
+### 15. User A confirms
+POST http://localhost:3000/api/team-ledger/rooms/{{roomCode}}/hands/1/confirm
+Authorization: Bearer {{token_a}}
+
+### 16. User B confirms
+POST http://localhost:3000/api/team-ledger/rooms/{{roomCode}}/hands/1/confirm
+Authorization: Bearer {{token_b}}
+
+### 17. User C confirms
+POST http://localhost:3000/api/team-ledger/rooms/{{roomCode}}/hands/1/confirm
+Authorization: Bearer {{token_c}}
+
+### Hand #1 should now be LOCKED
+
+### ==========================================
+### Hand #2
+### ==========================================
+
+### 18. Owner creates next hand
+POST http://localhost:3000/api/team-ledger/rooms/{{roomCode}}/next-hand
+Authorization: Bearer {{token_a}}
+
+### 19. User A submits: -50
+POST http://localhost:3000/api/team-ledger/rooms/{{roomCode}}/hands/2/entry
+Content-Type: application/json
+Authorization: Bearer {{token_a}}
+
+{
+  "amount": -50
+}
+
+### 20. User B submits: +150
+POST http://localhost:3000/api/team-ledger/rooms/{{roomCode}}/hands/2/entry
+Content-Type: application/json
+Authorization: Bearer {{token_b}}
+
+{
+  "amount": 150
+}
+
+### 21. User C submits: -100
+POST http://localhost:3000/api/team-ledger/rooms/{{roomCode}}/hands/2/entry
+Content-Type: application/json
+Authorization: Bearer {{token_c}}
+
+{
+  "amount": -100
+}
+
+### 22. Check balance (should be 0)
+GET http://localhost:3000/api/team-ledger/rooms/{{roomCode}}/hands/2/balance
+Authorization: Bearer {{token_a}}
+
+### 23. Request confirm, then A, B, C confirm
+POST http://localhost:3000/api/team-ledger/rooms/{{roomCode}}/hands/2/request-confirm
+Authorization: Bearer {{token_a}}
+
+### 24. Confirm (repeat for token_a, token_b, token_c)
+POST http://localhost:3000/api/team-ledger/rooms/{{roomCode}}/hands/2/confirm
+Authorization: Bearer {{token_a}}
+
+### ==========================================
+### Summary & Settlement
+### ==========================================
+
+### 25. Get summary (A: +250, B: +50, C: -300)
+GET http://localhost:3000/api/team-ledger/rooms/{{roomCode}}/summary
+Authorization: Bearer {{token_a}}
+
+### 26. Generate settlement suggestions
+POST http://localhost:3000/api/team-ledger/rooms/{{roomCode}}/settlement
+Authorization: Bearer {{token_a}}
+
+### 27. End the room
+POST http://localhost:3000/api/team-ledger/rooms/{{roomCode}}/end
+Authorization: Bearer {{token_a}}
+
+### 28. Close the room
+POST http://localhost:3000/api/team-ledger/rooms/{{roomCode}}/close
+Authorization: Bearer {{token_a}}
+
+### ==========================================
+### Edge Cases
+### ==========================================
+
+### Test: Imbalanced entries (sum != 0)
+### Create new room, start, submit unbalanced amounts
+### Should fail when trying to request-confirm
+
+### Test: Dispute flow
+### Submit balanced entries → request confirm → B disputes → check status
+### POST .../hands/N/dispute with note="金额不对"
+### Should reset confirm status for all
+
+### Test: Non-owner cannot start/end room
+### Should return 403 Forbidden
+
+### Test: Non-participant cannot see room details
+### Should return 404 or 403
+
+### Test: Owner submits entry for temp player
+POST http://localhost:3000/api/team-ledger/rooms/{{roomCode}}/hands/{{handNo}}/entry-temp/{{participantId}}
+Content-Type: application/json
+Authorization: Bearer {{token_a}}
+
+{
+  "amount": 500
+}

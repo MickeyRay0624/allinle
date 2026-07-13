@@ -1,0 +1,73 @@
+@baseUrl = http://localhost:3000/api
+@token = 替换为你的用户 token
+@roomCode = 替换为单人练习返回的 data.roomState.roomCode
+@handId = 替换为 data.publicState.handId 或复盘中的 handId
+
+### create solo practice and auto start first hand
+POST {{baseUrl}}/practice/solo/create
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "botCount": 2,
+  "botLevel": "NORMAL",
+  "initialPracticeChips": 2000,
+  "smallBlind": 10,
+  "bigBlind": 20
+}
+
+### get current game state
+GET {{baseUrl}}/practice/rooms/{{roomCode}}/game-state
+Authorization: Bearer {{token}}
+
+### user action: check
+POST {{baseUrl}}/practice/rooms/{{roomCode}}/actions
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "actionType": "CHECK"
+}
+
+### user action: call
+POST {{baseUrl}}/practice/rooms/{{roomCode}}/actions
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "actionType": "CALL"
+}
+
+### user action: raise to amount
+POST {{baseUrl}}/practice/rooms/{{roomCode}}/actions
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "actionType": "RAISE",
+  "amount": 80
+}
+
+### latest hand replay
+GET {{baseUrl}}/practice/rooms/{{roomCode}}/latest-hand-replay
+Authorization: Bearer {{token}}
+
+### one hand replay
+GET {{baseUrl}}/practice/hands/{{handId}}/replay
+Authorization: Bearer {{token}}
+
+### room stats
+GET {{baseUrl}}/practice/rooms/{{roomCode}}/stats
+Authorization: Bearer {{token}}
+
+### practice stats overview
+GET {{baseUrl}}/stats/practice/overview
+Authorization: Bearer {{token}}
+
+### practice stats advice
+GET {{baseUrl}}/stats/practice/advice
+Authorization: Bearer {{token}}
+
+### end solo practice room
+POST {{baseUrl}}/practice/rooms/{{roomCode}}/end
+Authorization: Bearer {{token}}

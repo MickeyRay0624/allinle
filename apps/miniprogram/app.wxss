@@ -1,0 +1,115 @@
+page {
+  min-height: 100vh;
+  background: #080808;
+  color: #f5f5f5;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.page {
+  min-height: 100vh;
+  padding: 32rpx;
+  box-sizing: border-box;
+}
+
+.title {
+  font-size: 44rpx;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.subtitle {
+  margin-top: 12rpx;
+  color: #a8a8a8;
+  font-size: 26rpx;
+}
+
+.section {
+  margin-top: 32rpx;
+}
+
+.card {
+  padding: 28rpx;
+  margin-bottom: 20rpx;
+  background: #161616;
+  border: 1rpx solid #2a2a2a;
+  border-radius: 8rpx;
+}
+
+.card-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #f4d06f;
+}
+
+.card-desc {
+  margin-top: 8rpx;
+  color: #b9b9b9;
+  font-size: 24rpx;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20rpx;
+}
+
+.field {
+  margin-bottom: 18rpx;
+}
+
+.label {
+  margin-bottom: 8rpx;
+  color: #b9b9b9;
+  font-size: 24rpx;
+}
+
+.input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 84rpx;
+  padding: 0 24rpx;
+  color: #f5f5f5;
+  background: #101010;
+  border: 1rpx solid #303030;
+  border-radius: 8rpx;
+}
+
+.textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 140rpx;
+  padding: 20rpx 24rpx;
+  color: #f5f5f5;
+  background: #101010;
+  border: 1rpx solid #303030;
+  border-radius: 8rpx;
+}
+
+.metric {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #f4d06f;
+}
+
+.muted {
+  color: #8c8c8c;
+  font-size: 24rpx;
+}
+
+.button-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 18rpx;
+}
+
+.notice {
+  color: #f4d06f;
+  font-size: 24rpx;
+  line-height: 1.6;
+}

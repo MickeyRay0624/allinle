@@ -1,0 +1,76 @@
+<view class="page">
+  <view class="title">数据中心</view>
+  <view class="subtitle">记账与非现金化练习统计</view>
+
+  <view class="section grid">
+    <view class="card">
+      <view class="card-title">记账场次</view>
+      <view class="metric">{{overview.ledgerGames || 0}}</view>
+    </view>
+    <view class="card">
+      <view class="card-title">练习手数</view>
+      <view class="metric">{{practice.totalHands || 0}}</view>
+    </view>
+    <view class="card">
+      <view class="card-title">模拟净结果</view>
+      <view class="metric">{{practice.totalPracticeChipsNet || 0}}</view>
+    </view>
+    <view class="card">
+      <view class="card-title">总盈亏</view>
+      <view class="metric">{{ledger.totalProfit || 0}}</view>
+    </view>
+  </view>
+
+  <view class="section card">
+    <view class="card-title">练习指标</view>
+    <view class="metric-grid">
+      <view class="metric-item">
+        <view class="metric small">{{practice.vpip || 0}}%</view>
+        <view class="muted">VPIP</view>
+      </view>
+      <view class="metric-item">
+        <view class="metric small">{{practice.pfr || 0}}%</view>
+        <view class="muted">PFR</view>
+      </view>
+      <view class="metric-item">
+        <view class="metric small">{{practice.wtsd || 0}}%</view>
+        <view class="muted">WTSD</view>
+      </view>
+      <view class="metric-item">
+        <view class="metric small">{{practice.wsd || 0}}%</view>
+        <view class="muted">WSD</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="card-title">训练建议</view>
+    <view wx:for="{{advice}}" wx:key="title" class="card advice-card">
+      <view class="card-title">{{item.title}}</view>
+      <view class="card-desc">{{item.content}}</view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="card-title">最近练习手牌</view>
+    <view wx:if="{{!recent.length}}" class="card">
+      <view class="card-desc">暂无已完成练习手牌</view>
+    </view>
+    <view
+      wx:for="{{recent}}"
+      wx:key="handId"
+      class="card recent-card"
+      data-hand-id="{{item.handId}}"
+      bindtap="openReplay"
+    >
+      <view class="row between">
+        <view>
+          <view class="card-title">{{item.roomCode}} · 第 {{item.handNo}} 手</view>
+          <view class="card-desc">{{item.mode}} · {{item.finalStatus}}</view>
+        </view>
+        <view class="metric small">{{item.netResult || 0}}</view>
+      </view>
+      <view wx:if="{{item.handRankDescription}}" class="muted">{{item.handRankDescription}}</view>
+    </view>
+  </view>
+</view>

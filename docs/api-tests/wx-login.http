@@ -1,0 +1,25 @@
+### 微信登录
+# 说明：
+# 1. wx-login 需要真实小程序 code
+# 2. code 只能使用一次，由 wx.login() 获取
+# 3. 只能在微信开发者工具或真机中获取 code
+# 4. dev-login 仅开发环境使用
+
+### 开发环境登录（仅开发环境可用）
+POST http://localhost:3000/api/auth/dev-login
+Content-Type: application/json
+
+{
+  "nickname": "测试用户",
+  "avatarUrl": "https://example.com/avatar.png"
+}
+
+### 正式微信登录（需要真实 code）
+POST http://localhost:3000/api/auth/wx-login
+Content-Type: application/json
+
+{
+  "code": "081xxxxxx",
+  "nickname": "微信用户",
+  "avatarUrl": "https://thirdwx.qlogo.cn/xxxx"
+}

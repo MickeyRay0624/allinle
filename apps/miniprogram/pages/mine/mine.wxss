@@ -1,0 +1,6 @@
+.card t-button {
+  margin-top: 20rpx;
+}
+.button-gap {
+  height: 16rpx;
+}

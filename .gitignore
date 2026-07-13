@@ -1,0 +1,16 @@
+node_modules
+dist
+.turbo
+.DS_Store
+.env
+.env.*
+!.env.example
+!**/.env.example
+coverage
+apps/admin/dist
+apps/api/dist
+apps/miniprogram/miniprogram_npm
+apps/miniprogram/node_modules
+apps/miniprogram/project.private.config.json
+*.tsbuildinfo
+*.log

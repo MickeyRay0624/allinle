@@ -1,0 +1,586 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserStatus {
+  NORMAL
+  LIMITED
+  BANNED
+}
+
+enum TeamRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum MemberStatus {
+  ACTIVE
+  REMOVED
+}
+
+enum LedgerGameType {
+  PERSONAL
+  TEAM
+}
+
+enum LedgerGameStatus {
+  DRAFT
+  ONGOING
+  FINISHED
+  CONFIRMED
+  DISPUTED
+}
+
+enum LedgerConfirmStatus {
+  PENDING
+  CONFIRMED
+  DISPUTED
+}
+
+enum LedgerTransactionType {
+  BUY_IN
+  REBUY
+  CASH_OUT
+  ADJUSTMENT
+}
+
+enum PracticeRoomMode {
+  FRIENDS
+  SOLO
+}
+
+enum PracticeRoomStatus {
+  WAITING
+  READY
+  PLAYING
+  FINISHED
+  CLOSED
+}
+
+enum BotLevel {
+  BEGINNER
+  NORMAL
+  ADVANCED
+}
+
+enum PracticeActionType {
+  FOLD
+  CHECK
+  CALL
+  BET
+  RAISE
+  ALL_IN
+  SMALL_BLIND
+  BIG_BLIND
+  DEAL
+  SHOWDOWN
+  WIN
+}
+
+enum PracticeStreet {
+  PREFLOP
+  FLOP
+  TURN
+  RIVER
+  SHOWDOWN
+}
+
+enum PracticeHandStatus {
+  PLAYING
+  FINISHED
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+  OPERATOR
+}
+
+enum AdminStatus {
+  NORMAL
+  DISABLED
+}
+
+model User {
+  id            String                 @id @default(cuid())
+  openid        String                 @unique
+  unionid       String?                @unique
+  nickname      String?
+  avatarUrl     String?
+  status        UserStatus             @default(NORMAL)
+  lastLoginAt   DateTime?
+  loginCount    Int                    @default(0)
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+
+  ownedTeams    Team[]                 @relation("TeamOwner")
+  memberships   TeamMember[]
+  ownedLedgers  LedgerGame[]           @relation("LedgerOwner")
+  ledgerPlayers LedgerPlayer[]
+  confirmations LedgerConfirmation[]
+  ownedRooms    PracticeRoom[]         @relation("PracticeRoomOwner")
+  roomPlayers   PracticeRoomPlayer[]
+  actions       PracticeAction[]
+  handPlayers   PracticeHandPlayer[]
+  riskLogs      RiskLog[]
+  eventLogs     EventLog[]
+  teamLedgerRooms     TeamLedgerRoom[]       @relation("TeamLedgerOwner")
+  teamLedgerParticipants TeamLedgerParticipant[]
+  contentChecks ContentCheckLog[]
+
+  @@index([status])
+}
+
+model Team {
+  id          String       @id @default(cuid())
+  name        String
+  ownerUserId String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  owner       User         @relation("TeamOwner", fields: [ownerUserId], references: [id])
+  members     TeamMember[]
+  ledgerGames LedgerGame[]
+
+  @@index([ownerUserId])
+}
+
+model TeamMember {
+  id        String       @id @default(cuid())
+  teamId    String
+  userId    String
+  role      TeamRole     @default(MEMBER)
+  status    MemberStatus @default(ACTIVE)
+  createdAt DateTime     @default(now())
+
+  team      Team         @relation(fields: [teamId], references: [id])
+  user      User         @relation(fields: [userId], references: [id])
+
+  @@unique([teamId, userId])
+  @@index([userId])
+}
+
+model LedgerGame {
+  id             String             @id @default(cuid())
+  ownerUserId    String
+  teamId         String?
+  type           LedgerGameType
+  title          String
+  blindLevel     String?
+  gameDate       DateTime
+  durationMinutes Int?
+  status         LedgerGameStatus   @default(DRAFT)
+  totalBuyIn     Decimal            @default(0) @db.Decimal(18, 2)
+  totalCashOut   Decimal            @default(0) @db.Decimal(18, 2)
+  totalProfit    Decimal            @default(0) @db.Decimal(18, 2)
+  note           String?            @db.Text
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  owner          User               @relation("LedgerOwner", fields: [ownerUserId], references: [id])
+  team           Team?              @relation(fields: [teamId], references: [id])
+  players        LedgerPlayer[]
+  transactions   LedgerTransaction[]
+  confirmations  LedgerConfirmation[]
+
+  @@index([ownerUserId, type])
+  @@index([teamId])
+  @@index([status])
+}
+
+model LedgerPlayer {
+  id            String              @id @default(cuid())
+  gameId        String
+  userId        String?
+  displayName   String
+  totalBuyIn    Decimal             @default(0) @db.Decimal(18, 2)
+  totalCashOut  Decimal             @default(0) @db.Decimal(18, 2)
+  profit        Decimal             @default(0) @db.Decimal(18, 2)
+  confirmStatus LedgerConfirmStatus @default(PENDING)
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
+  game          LedgerGame          @relation(fields: [gameId], references: [id])
+  user          User?               @relation(fields: [userId], references: [id])
+  transactions  LedgerTransaction[]
+
+  @@index([gameId])
+  @@index([userId])
+}
+
+model LedgerTransaction {
+  id        String                @id @default(cuid())
+  gameId    String
+  playerId  String
+  type      LedgerTransactionType
+  amount    Decimal               @db.Decimal(18, 2)
+  note      String?               @db.Text
+  createdAt DateTime              @default(now())
+
+  game      LedgerGame            @relation(fields: [gameId], references: [id])
+  player    LedgerPlayer          @relation(fields: [playerId], references: [id])
+
+  @@index([gameId])
+  @@index([playerId])
+}
+
+model LedgerConfirmation {
+  id          String              @id @default(cuid())
+  gameId      String
+  userId      String
+  status      LedgerConfirmStatus
+  note        String?             @db.Text
+  confirmedAt DateTime            @default(now())
+
+  game        LedgerGame          @relation(fields: [gameId], references: [id])
+  user        User                @relation(fields: [userId], references: [id])
+
+  @@unique([gameId, userId])
+  @@index([userId])
+}
+
+model PracticeRoom {
+  id                          String               @id @default(cuid())
+  roomCode                    String               @unique
+  ownerUserId                 String
+  mode                        PracticeRoomMode
+  playerCount                 Int
+  smallBlind                  Int
+  bigBlind                    Int
+  initialPracticeChips        Int
+  status                      PracticeRoomStatus   @default(WAITING)
+  complianceConfirmedRequired Boolean              @default(true)
+  startedAt                   DateTime?
+  endedAt                     DateTime?
+  createdAt                   DateTime             @default(now())
+  updatedAt                   DateTime             @updatedAt
+
+  owner                       User                 @relation("PracticeRoomOwner", fields: [ownerUserId], references: [id])
+  players                     PracticeRoomPlayer[]
+  hands                       PracticeHand[]
+  riskLogs                    RiskLog[]
+
+  @@index([ownerUserId])
+  @@index([status])
+}
+
+model PracticeRoomPlayer {
+  id                    String    @id @default(cuid())
+  roomId                String
+  userId                String?
+  seatNo                Int
+  chips                 Int
+  readyStatus           Boolean   @default(false)
+  initialChipsConfirmed Boolean   @default(false)
+  isBot                 Boolean   @default(false)
+  botLevel              BotLevel?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  room                  PracticeRoom @relation(fields: [roomId], references: [id])
+  user                  User?        @relation(fields: [userId], references: [id])
+
+  @@unique([roomId, seatNo])
+  @@index([roomId])
+  @@index([userId])
+}
+
+model PracticeHand {
+  id             String           @id @default(cuid())
+  roomId         String
+  handNo         Int
+  dealerSeat     Int
+  smallBlindSeat Int
+  bigBlindSeat   Int
+  boardCards     Json?
+  potSize        Int              @default(0)
+  winnerInfo     Json?
+  status         PracticeHandStatus @default(PLAYING)
+  startedAt      DateTime         @default(now())
+  endedAt        DateTime?
+
+  room           PracticeRoom     @relation(fields: [roomId], references: [id])
+  actions        PracticeAction[]
+  players        PracticeHandPlayer[]
+
+  @@unique([roomId, handNo])
+  @@index([roomId])
+  @@index([status])
+}
+
+model PracticeAction {
+  id         String             @id @default(cuid())
+  handId     String
+  userId     String?
+  seatNo     Int
+  actionType PracticeActionType
+  amount     Int?
+  street     PracticeStreet
+  createdAt  DateTime           @default(now())
+
+  hand       PracticeHand       @relation(fields: [handId], references: [id])
+  user       User?              @relation(fields: [userId], references: [id])
+
+  @@index([handId])
+  @@index([userId])
+}
+
+model PracticeHandPlayer {
+  id          String       @id @default(cuid())
+  handId      String
+  userId      String?
+  seatNo      Int
+  nickname    String?
+  isBot       Boolean      @default(false)
+  botLevel    BotLevel?
+  holeCards   Json?
+  startChips  Int
+  endChips    Int?
+  invested    Int          @default(0)
+  netResult   Int?
+  finalStatus String       @default("ACTIVE")
+  showdown    Boolean      @default(false)
+  handRankCategory String?
+  handRankDescription String?
+  bestFiveCards Json?
+  createdAt   DateTime     @default(now())
+
+  hand        PracticeHand @relation(fields: [handId], references: [id])
+  user        User?        @relation(fields: [userId], references: [id])
+
+  @@unique([handId, seatNo])
+  @@index([handId])
+  @@index([userId])
+}
+
+model RiskLog {
+  id        String     @id @default(cuid())
+  userId    String?
+  roomId    String?
+  eventType String
+  riskLevel RiskLevel
+  detail    Json?
+  createdAt DateTime   @default(now())
+
+  user      User?      @relation(fields: [userId], references: [id])
+  room      PracticeRoom? @relation(fields: [roomId], references: [id])
+
+  @@index([userId])
+  @@index([roomId])
+  @@index([eventType])
+  @@index([riskLevel])
+}
+
+model AdminUser {
+  id           String          @id @default(cuid())
+  username     String          @unique
+  passwordHash String
+  role         AdminRole       @default(OPERATOR)
+  status       AdminStatus     @default(NORMAL)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  auditLogs    AdminAuditLog[]
+
+  @@index([status])
+}
+
+model AdminAuditLog {
+  id          String     @id @default(cuid())
+  adminUserId String
+  action      String
+  targetType  String
+  targetId    String?
+  detail      Json?
+  createdAt   DateTime   @default(now())
+
+  adminUser   AdminUser  @relation(fields: [adminUserId], references: [id])
+
+  @@index([adminUserId])
+  @@index([action])
+}
+
+model SystemConfig {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     Json
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+}
+
+model EventLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  eventName  String
+  eventGroup String?
+  metadata   Json?
+  ip         String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  user       User?    @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([eventName])
+  @@index([eventGroup])
+  @@index([createdAt])
+}
+
+model ContentCheckLog {
+  id            String   @id @default(cuid())
+  userId        String?
+  content       String   @db.Text
+  contentType   String
+  checkResult   String
+  riskLevel     String?
+  detail        Json?
+  createdAt     DateTime @default(now())
+
+  user          User?    @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([contentType])
+  @@index([checkResult])
+  @@index([createdAt])
+}
+
+// ========== Team Ledger (Per-Hand) ==========
+
+enum TeamLedgerRoomStatus {
+  WAITING
+  ACTIVE
+  FINISHED
+  CLOSED
+}
+
+enum TeamLedgerParticipantRole {
+  OWNER
+  MEMBER
+}
+
+enum TeamLedgerParticipantStatus {
+  ACTIVE
+  LEFT
+  REMOVED
+}
+
+enum TeamLedgerHandStatus {
+  OPEN
+  CONFIRMING
+  LOCKED
+  DISPUTED
+}
+
+enum TeamLedgerEntryStatus {
+  PENDING
+  SUBMITTED
+  CONFIRMED
+  DISPUTED
+}
+
+model TeamLedgerRoom {
+  id             String                  @id @default(cuid())
+  roomCode       String                  @unique
+  title          String?
+  ownerUserId    String
+  status         TeamLedgerRoomStatus    @default(WAITING)
+  currentHandNo  Int                     @default(0)
+  startedAt      DateTime?
+  endedAt        DateTime?
+  note           String?                 @db.Text
+  createdAt      DateTime                @default(now())
+  updatedAt      DateTime                @updatedAt
+
+  owner          User                    @relation("TeamLedgerOwner", fields: [ownerUserId], references: [id])
+  participants   TeamLedgerParticipant[]
+  hands          TeamLedgerHand[]
+  settlements    SettlementSuggestion[]
+
+  @@index([ownerUserId])
+  @@index([status])
+}
+
+model TeamLedgerParticipant {
+  id          String                        @id @default(cuid())
+  roomId      String
+  userId      String?
+  displayName String
+  avatarUrl   String?
+  seatNo      Int
+  role        TeamLedgerParticipantRole     @default(MEMBER)
+  status      TeamLedgerParticipantStatus   @default(ACTIVE)
+  buyInAmount Decimal?                      @db.Decimal(18, 2)
+  joinedAt    DateTime                      @default(now())
+  leftAt      DateTime?
+
+  room        TeamLedgerRoom                @relation(fields: [roomId], references: [id])
+  user        User?                         @relation(fields: [userId], references: [id])
+  entries     TeamLedgerEntry[]
+
+  @@unique([roomId, seatNo])
+  @@index([roomId])
+  @@index([userId])
+}
+
+model TeamLedgerHand {
+  id        String                @id @default(cuid())
+  roomId    String
+  handNo    Int
+  status    TeamLedgerHandStatus  @default(OPEN)
+  note      String?               @db.Text
+  createdAt DateTime              @default(now())
+  lockedAt  DateTime?
+  updatedAt DateTime              @updatedAt
+
+  room      TeamLedgerRoom        @relation(fields: [roomId], references: [id])
+  entries   TeamLedgerEntry[]
+
+  @@unique([roomId, handNo])
+  @@index([roomId])
+  @@index([status])
+}
+
+model TeamLedgerEntry {
+  id            String                  @id @default(cuid())
+  handId        String
+  participantId String
+  amount        Decimal                 @default(0) @db.Decimal(18, 2)
+  status        TeamLedgerEntryStatus   @default(PENDING)
+  disputeNote   String?                 @db.Text
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+
+  hand          TeamLedgerHand          @relation(fields: [handId], references: [id])
+  participant   TeamLedgerParticipant   @relation(fields: [participantId], references: [id])
+
+  @@unique([handId, participantId])
+  @@index([handId])
+  @@index([participantId])
+}
+
+model SettlementSuggestion {
+  id          String   @id @default(cuid())
+  roomId      String
+  fromUserId  String?
+  fromName    String
+  toUserId    String?
+  toName      String
+  amount      Decimal  @db.Decimal(18, 2)
+  createdAt   DateTime @default(now())
+
+  room        TeamLedgerRoom @relation(fields: [roomId], references: [id])
+
+  @@index([roomId])
+}

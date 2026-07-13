@@ -1,0 +1,109 @@
+.card-wrapper {
+  display: inline-flex;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.card-wrapper.dealt {
+  animation: cardDealIn 0.35s ease-out;
+}
+.card-wrapper.highlight {
+  transform: translateY(-12rpx);
+  filter: drop-shadow(0 8rpx 16rpx rgba(244, 208, 111, 0.4));
+}
+.card-wrapper.faded {
+  opacity: 0.35;
+  transform: scale(0.92);
+}
+.card {
+  display: flex;
+  position: relative;
+  width: 88rpx;
+  height: 120rpx;
+  border-radius: 10rpx;
+  overflow: hidden;
+}
+.size-small .card {
+  width: 60rpx;
+  height: 84rpx;
+  border-radius: 6rpx;
+}
+.size-large .card {
+  width: 120rpx;
+  height: 164rpx;
+  border-radius: 12rpx;
+}
+.card-face {
+  background: linear-gradient(145deg, #fdfdfd 0%, #f0ede0 100%);
+  border: 2rpx solid #d4c89a;
+}
+.card-back {
+  background: #1a3a5c;
+  border: 2rpx solid #2a5a8c;
+}
+.card-back-pattern {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 4rpx,
+    rgba(255,255,255,0.06) 4rpx,
+    rgba(255,255,255,0.06) 8rpx
+  );
+}
+.back-diamond {
+  width: 36rpx;
+  height: 36rpx;
+  background: rgba(255,255,255,0.12);
+  border: 2rpx solid rgba(255,255,255,0.2);
+  border-radius: 4rpx;
+  transform: rotate(45deg);
+}
+.card-corner {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+}
+.top-left {
+  top: 6rpx;
+  left: 8rpx;
+}
+.bottom-right {
+  right: 8rpx;
+  bottom: 6rpx;
+  transform: rotate(180deg);
+}
+.card-rank {
+  font-size: 24rpx;
+  font-weight: 700;
+}
+.size-small .card-rank { font-size: 16rpx; }
+.size-large .card-rank { font-size: 32rpx; }
+.card-suit {
+  font-size: 18rpx;
+}
+.size-small .card-suit { font-size: 12rpx; }
+.size-large .card-suit { font-size: 24rpx; }
+.card-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.card-center-suit {
+  font-size: 56rpx;
+  opacity: 0.18;
+}
+.size-small .card-center-suit { font-size: 36rpx; }
+.size-large .card-center-suit { font-size: 76rpx; }
+
+@keyframes cardDealIn {
+  0% { opacity: 0; transform: translateY(-40rpx) scale(0.6); }
+  60% { opacity: 1; transform: translateY(4rpx) scale(1.02); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}

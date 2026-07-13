@@ -1,0 +1,316 @@
+/* Override global dark theme for team ledger page */
+.page {
+  padding: 20rpx;
+  padding-bottom: 40rpx;
+  background: #f0f2f5;
+  min-height: 100vh;
+  color: #333;
+}
+
+.title {
+  font-size: 40rpx;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 20rpx;
+  color: #1a1a2e;
+}
+
+.subtitle {
+  text-align: center;
+  font-size: 24rpx;
+  color: #888;
+  margin-bottom: 30rpx;
+}
+
+/* Description */
+.description {
+  background: #fff;
+  border-radius: 12rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+  color: #333;
+}
+
+.desc-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  margin-bottom: 12rpx;
+  color: #1a1a2e;
+}
+
+.desc-text {
+  font-size: 26rpx;
+  color: #555;
+  line-height: 1.6;
+}
+
+.desc-note {
+  font-size: 24rpx;
+  color: #e6a817;
+  margin-top: 12rpx;
+}
+
+/* Card */
+.card {
+  background: #fff;
+  border-radius: 12rpx;
+  padding: 24rpx;
+  margin-bottom: 16rpx;
+  color: #333;
+}
+
+.card-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  margin-bottom: 12rpx;
+  color: #1a1a2e;
+}
+
+.card-desc {
+  font-size: 26rpx;
+  color: #666;
+}
+
+.section {
+  margin-bottom: 10rpx;
+  color: #333;
+}
+
+/* Room Code */
+.room-code {
+  font-family: monospace;
+  font-size: 32rpx;
+  color: #1677ff;
+  font-weight: bold;
+  letter-spacing: 4rpx;
+}
+
+/* Members */
+.member-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12rpx 0;
+  border-bottom: 1rpx solid #eee;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.member-row:last-child {
+  border-bottom: none;
+}
+
+.member-left {
+  display: flex;
+  align-items: center;
+  color: #333;
+}
+
+.member-right {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.seat-no {
+  color: #999;
+  font-size: 24rpx;
+  margin-right: 12rpx;
+}
+
+.owner-badge {
+  font-size: 20rpx;
+  background: #faad14;
+  color: #fff;
+  padding: 2rpx 10rpx;
+  border-radius: 8rpx;
+}
+
+.reg-badge {
+  font-size: 20rpx;
+  background: #1677ff;
+  color: #fff;
+  padding: 2rpx 10rpx;
+  border-radius: 8rpx;
+}
+
+.temp-badge {
+  font-size: 20rpx;
+  background: #52c41a;
+  color: #fff;
+  padding: 2rpx 10rpx;
+  border-radius: 8rpx;
+}
+
+/* Hand header */
+.hand-header {
+  background: #fff;
+  border-radius: 12rpx;
+  padding: 24rpx;
+  margin-bottom: 16rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #333;
+}
+
+.hand-title {
+  font-size: 34rpx;
+  font-weight: bold;
+  color: #1a1a2e;
+}
+
+.hand-status {
+  font-size: 26rpx;
+}
+
+.locked-text { color: #52c41a; font-weight: bold; }
+.confirming-text { color: #1677ff; font-weight: bold; }
+.disputed-text { color: #ff4d4f; font-weight: bold; }
+.open-text { color: #faad14; }
+
+/* Balance */
+.balance-card {
+  background: #f0f7ff !important;
+  color: #333;
+}
+
+.balance-row {
+  font-size: 36rpx;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  color: #333;
+}
+
+.balanced { color: #52c41a; }
+.unbalanced { color: #ff4d4f; }
+.balanced-text { color: #52c41a; font-size: 26rpx; }
+.unbalanced-text { color: #ff4d4f; font-size: 26rpx; }
+
+.balance-detail {
+  font-size: 24rpx;
+  color: #888;
+  margin-top: 8rpx;
+}
+
+/* Field */
+.field-hint {
+  font-size: 22rpx;
+  color: #999;
+  margin-bottom: 8rpx;
+}
+
+/* Entry rows */
+.entry-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+  font-size: 26rpx;
+  color: #333;
+}
+
+.entry-row:last-child {
+  border-bottom: none;
+}
+
+.entry-right {
+  font-size: 24rpx;
+}
+
+.pending-text { color: #bbb; }
+.submitted-text { color: #faad14; }
+.confirm-text { color: #52c41a; }
+.dispute-text { color: #ff4d4f; }
+
+/* Positive / Negative */
+.positive { color: #52c41a; font-weight: bold; }
+.negative { color: #ff4d4f; font-weight: bold; }
+
+/* Settlement */
+.settlement-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12rpx 0;
+  border-bottom: 1rpx solid #eee;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.settlement-row:last-child {
+  border-bottom: none;
+}
+
+/* Hand details */
+.hand-detail-row {
+  padding: 12rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+  color: #333;
+}
+
+.hand-detail-row:last-child {
+  border-bottom: none;
+}
+
+.hand-detail-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  margin-bottom: 6rpx;
+  color: #1a1a2e;
+}
+
+.hand-detail-entry {
+  font-size: 24rpx;
+  color: #555;
+  padding-left: 16rpx;
+}
+
+/* Button - override dark theme */
+.button-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+  color: #333;
+}
+
+.button-row {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 12rpx;
+}
+
+/* Muted */
+.muted {
+  font-size: 24rpx;
+  color: #bbb;
+}
+
+/* Dual input */
+.dual-input-row {
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: 12rpx;
+}
+
+.dual-input-half {
+  flex: 1;
+}
+
+.dual-label {
+  font-size: 26rpx;
+  font-weight: bold;
+  margin-bottom: 8rpx;
+  color: #333;
+}
+
+.win-input .dual-label {
+  color: #52c41a;
+}
+
+.loss-input .dual-label {
+  color: #ff4d4f;
+}

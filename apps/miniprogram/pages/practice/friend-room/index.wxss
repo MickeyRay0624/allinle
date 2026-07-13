@@ -1,0 +1,79 @@
+.member-card {
+  padding: 22rpx 28rpx;
+}
+.member-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.member-left {
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+.member-seat {
+  font-size: 20rpx;
+  color: #f4d06f;
+}
+.member-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #ffffff;
+}
+.owner-badge {
+  display: inline-block;
+  margin-left: 8rpx;
+  padding: 2rpx 10rpx;
+  font-size: 20rpx;
+  color: #0c0c0c;
+  background: #f4d06f;
+  border-radius: 6rpx;
+}
+.member-right {
+  text-align: right;
+}
+.member-chips {
+  font-size: 26rpx;
+  color: #f4d06f;
+  font-weight: 600;
+}
+.member-status {
+  display: flex;
+  flex-direction: column;
+  gap: 2rpx;
+  margin-top: 6rpx;
+}
+.status-item {
+  font-size: 22rpx;
+}
+.status-item.done {
+  color: #5cb85c;
+}
+.status-item.pending {
+  color: #8c8c8c;
+}
+.hint {
+  margin-top: 16rpx;
+  text-align: center;
+}
+.hint-box {
+  margin-top: 20rpx;
+  padding: 16rpx 20rpx;
+  background: rgba(244, 208, 111, 0.08);
+  border: 1rpx solid rgba(244, 208, 111, 0.2);
+  border-radius: 10rpx;
+  text-align: center;
+}
+.muted-box {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+.hint-text {
+  font-size: 26rpx;
+  color: #f4d06f;
+  font-weight: 600;
+}
+.muted-text {
+  color: #888;
+  font-weight: 400;
+}

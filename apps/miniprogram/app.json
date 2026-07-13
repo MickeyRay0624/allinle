@@ -1,0 +1,33 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/ledger-personal/ledger-personal",
+    "pages/ledger-team/ledger-team",
+    "pages/practice/practice",
+    "pages/practice/friend-room/index",
+    "pages/practice/friend-table/index",
+    "pages/practice-room/practice-room",
+    "pages/practice-replay/practice-replay",
+    "pages/practice-solo/practice-solo",
+    "pages/stats/stats",
+    "pages/mine/mine",
+    "pages/dev/table-animation-demo/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "ALLINLE",
+    "navigationBarBackgroundColor": "#080808",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#080808"
+  },
+  "usingComponents": {
+    "t-button": "tdesign-miniprogram/button/button",
+    "t-input": "tdesign-miniprogram/input/input",
+    "t-cell": "tdesign-miniprogram/cell/cell",
+    "t-cell-group": "tdesign-miniprogram/cell-group/cell-group",
+    "t-radio": "tdesign-miniprogram/radio/radio",
+    "t-radio-group": "tdesign-miniprogram/radio-group/radio-group",
+    "t-notice-bar": "tdesign-miniprogram/notice-bar/notice-bar",
+    "poker-card": "/components/poker-card/index"
+  },
+  "sitemapLocation": "sitemap.json"
+}
