@@ -15,9 +15,12 @@ Page({ data: { mode: "", room: null, roomCodeInput: "", titleInput: "", tempName
         const currentHand = room.hands?.[room.hands.length - 1] || null;
         const activeParticipants = room.participants.filter((p) => p.status === "ACTIVE");
         const confirmedEntries = currentHand?.entries?.filter((entry) => entry.status === "CONFIRMED") || [];
+        const submittedEntries = currentHand?.entries?.filter((entry) => entry.status === "SUBMITTED" || entry.status === "CONFIRMED") || [];
+        const total = submittedEntries.reduce((sum, entry) => sum + Number(entry.amount), 0);
         const myEntry = currentHand?.entries?.find((entry) => entry.participantId === me?.id);
         const isBuyInPhase = room.status === "ACTIVE" && room.currentHandNo === 0;
-        const nextData = { room, currentHand, isOwner: room.ownerUserId === uid, myParticipantId: me?.id || "", isBuyInPhase, allHaveBuyIn: activeParticipants.every((p) => p.buyInAmount !== null && p.buyInAmount !== undefined), myConfirmed: myEntry?.status === "CONFIRMED", confirmationCount: confirmedEntries.length, confirmationTotal: activeParticipants.length };
+        const balance = currentHand ? { total, isBalanced: total === 0, allSubmitted: submittedEntries.length === activeParticipants.length, submittedCount: submittedEntries.length, totalCount: activeParticipants.length } : null;
+        const nextData = { room, currentHand, balance, isOwner: room.ownerUserId === uid, myParticipantId: me?.id || "", isBuyInPhase, allHaveBuyIn: activeParticipants.every((p) => p.buyInAmount !== null && p.buyInAmount !== undefined), myConfirmed: myEntry?.status === "CONFIRMED", confirmationCount: confirmedEntries.length, confirmationTotal: activeParticipants.length };
         if (me?.buyInAmount !== null && me?.buyInAmount !== undefined)
             nextData.myBuyIn = String(me.buyInAmount);
         this.setData(nextData);
@@ -39,10 +42,23 @@ Page({ data: { mode: "", room: null, roomCodeInput: "", titleInput: "", tempName
     async submitEntry() { const h = this.data.currentHand; if (!h)
         return; const n = this.data.myWinEntry ? Number(this.data.myWinEntry) : -Number(this.data.myLossEntry); await request_1.api.post(`/team-ledger/rooms/${this.data.roomCodeInput}/hands/${h.handNo}/entry`, { amount: n }); this.setData({ myWinEntry: "", myLossEntry: "" }); await this.refreshRoom(); await this.checkBalance(); },
     async checkBalance() { const h = this.data.currentHand; if (h)
-        this.setData({ balance: await request_1.api.get(`/team-ledger/rooms/${this.data.roomCodeInput}/hands/${h.handNo}/balance`) }); }, async requestConfirmation() { const h = this.data.currentHand; await request_1.api.post(`/team-ledger/rooms/${this.data.roomCodeInput}/hands/${h.handNo}/request-confirm`, {}); await this.refreshRoom(); }, async confirmHand() { const h = this.data.currentHand; if (this.data.myConfirmed) {
+        this.setData({ balance: await request_1.api.get(`/team-ledger/rooms/${this.data.roomCodeInput}/hands/${h.handNo}/balance`) }); }, async requestConfirmation() { const h = this.data.currentHand; if (!this.data.balance?.allSubmitted) {
+        wx.showToast({ title: "还有参与者未提交金额", icon: "none" });
+        return;
+    } if (!this.data.balance?.isBalanced) {
+        wx.showToast({ title: "账目尚未平衡", icon: "none" });
+        return;
+    } try {
+        await request_1.api.post(`/team-ledger/rooms/${this.data.roomCodeInput}/hands/${h.handNo}/request-confirm`, {});
+        wx.showToast({ title: "已请求全员确认", icon: "success" });
+        await this.refreshRoom();
+    }
+    catch (e) {
+        wx.showToast({ title: e.message || "请求确认失败", icon: "none" });
+    } }, async confirmHand() { const h = this.data.currentHand; if (this.data.myConfirmed) {
         wx.showToast({ title: "你已确认本手", icon: "none" });
         return;
-    } await request_1.api.post(`/team-ledger/rooms/${this.data.roomCodeInput}/hands/${h.handNo}/confirm`, {}); this.setData({ myConfirmed: true, confirmationCount: Math.min(this.data.confirmationCount + 1, this.data.confirmationTotal) }); wx.showToast({ title: "本手已确认", icon: "success" }); await this.refreshRoom(); }, async disputeHand() { const h = this.data.currentHand; await request_1.api.post(`/team-ledger/rooms/${this.data.roomCodeInput}/hands/${h.handNo}/dispute`, { note: this.data.disputeNote }); await this.refreshRoom(); },
+    } await request_1.api.post(`/team-ledger/rooms/${this.data.roomCodeInput}/hands/${h.handNo}/confirm`, {}); this.setData({ myConfirmed: true, confirmationCount: Math.min(this.data.confirmationCount + 1, this.data.confirmationTotal) }); wx.showToast({ title: "本手已确认", icon: "success" }); await this.refreshRoom(); }, async disputeHand() { const h = this.data.currentHand; await request_1.api.post(`/team-ledger/rooms/${this.data.roomCodeInput}/hands/${h.handNo}/dispute`, { note: this.data.disputeNote }); this.setData({ balance: { total: 0, isBalanced: true, allSubmitted: false, submittedCount: 0, totalCount: this.data.confirmationTotal } }); await this.refreshRoom(); },
     async loadSummary() { this.setData({ summary: await request_1.api.get(`/team-ledger/rooms/${this.data.roomCodeInput}/summary`) }); }, async loadSettlement() { this.setData({ settlements: await request_1.api.post(`/team-ledger/rooms/${this.data.roomCodeInput}/settlement`, {}) }); }, async endRoom() { await request_1.api.post(`/team-ledger/rooms/${this.data.roomCodeInput}/end`, {}); await this.refreshRoom(); await this.loadSummary(); }, leaveRoom() { if (timer) {
         clearInterval(timer);
         timer = null;
