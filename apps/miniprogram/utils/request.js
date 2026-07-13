@@ -9,7 +9,7 @@ exports.devLogin = devLogin;
 exports.ensureDevLogin = ensureDevLogin;
 exports.switchDevLogin = switchDevLogin;
 exports.isDevVersion = isDevVersion;
-const API_BASE = "https://api.lmqstudio.com/api";
+const API_BASE = "https://api.poker.lmqstudio.com/api";
 function getToken() {
     try {
         return wx.getStorageSync("token") || null;

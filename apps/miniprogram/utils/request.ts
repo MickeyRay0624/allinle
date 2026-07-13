@@ -1,4 +1,4 @@
-const API_BASE = "https://api.lmqstudio.com/api";
+const API_BASE = "https://api.poker.lmqstudio.com/api";
 
 interface RequestOptions {
   url: string;

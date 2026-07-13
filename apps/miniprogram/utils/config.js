@@ -9,7 +9,7 @@ function getDefaultApiBase() {
         }
     }
     catch (_) { }
-    return "https://api.lmqstudio.com/api";
+    return "https://api.poker.lmqstudio.com/api";
 }
 function getDefaultWsBase() {
     try {
@@ -19,7 +19,7 @@ function getDefaultWsBase() {
         }
     }
     catch (_) { }
-    return "https://api.lmqstudio.com";
+    return "https://api.poker.lmqstudio.com";
 }
 exports.config = {
     apiBaseUrl: getDefaultApiBase(),

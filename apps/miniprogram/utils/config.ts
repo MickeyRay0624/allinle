@@ -5,7 +5,7 @@ function getDefaultApiBase(): string {
       return "http://127.0.0.1:3000/api";
     }
   } catch (_) {}
-  return "https://api.lmqstudio.com/api";
+  return "https://api.poker.lmqstudio.com/api";
 }
 
 function getDefaultWsBase(): string {
@@ -15,7 +15,7 @@ function getDefaultWsBase(): string {
       return "http://127.0.0.1:3000";
     }
   } catch (_) {}
-  return "https://api.lmqstudio.com";
+  return "https://api.poker.lmqstudio.com";
 }
 
 export const config = {
