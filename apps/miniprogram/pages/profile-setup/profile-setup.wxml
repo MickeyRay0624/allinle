@@ -2,9 +2,12 @@
   <view class="title">设置你的昵称</view>
   <view class="subtitle">好友练习和团队记账时，其他成员将通过昵称识别你。</view>
   <view class="section card">
+    <view class="card-desc">微信身份：{{wechatId}}</view>
+    <image wx:if="{{avatarUrl}}" class="profile-avatar" src="{{avatarUrl}}" mode="aspectFill" />
+    <t-button variant="outline" block bindtap="useWechatProfile">采用微信头像和昵称</t-button>
     <view class="label">昵称</view>
     <t-input value="{{nickname}}" maxlength="20" placeholder="请输入2-20个字符" bindchange="onNicknameInput" />
-    <view class="tip">设置后仍可在“我的”页面修改。</view>
+    <view class="tip">不采用微信资料时，可自行填写昵称；设置后仍可在“我的”页面修改。</view>
     <t-button theme="primary" block loading="{{saving}}" disabled="{{saving}}" bindtap="saveNickname">保存并继续</t-button>
   </view>
 </view>

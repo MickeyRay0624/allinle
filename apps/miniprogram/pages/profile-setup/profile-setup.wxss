@@ -3,3 +3,4 @@
   color: #8c8c8c;
   font-size: 24rpx;
 }
+.profile-avatar { width: 120rpx; height: 120rpx; margin: 24rpx auto; display: block; border-radius: 50%; }

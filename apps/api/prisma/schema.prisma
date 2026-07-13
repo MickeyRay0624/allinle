@@ -284,6 +284,7 @@ model PracticeRoomPlayer {
   chips                 Int
   readyStatus           Boolean   @default(false)
   initialChipsConfirmed Boolean   @default(false)
+  chipsSetByPlayer      Boolean   @default(false)
   isBot                 Boolean   @default(false)
   botLevel              BotLevel?
   createdAt             DateTime  @default(now())

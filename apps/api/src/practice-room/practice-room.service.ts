@@ -142,10 +142,26 @@ export class PracticeRoomService {
     const room = await this.getByRoomCode(roomCode);
     this.assertRoomCanChangeWaitingState(room.status);
     await this.assertRoomPlayer(room.id, userId);
+    if (!room.players.every((player) => player.chipsSetByPlayer)) {
+      throw new BadRequestException("还有成员未填写带入筹码");
+    }
     await this.prisma.practiceRoomPlayer.updateMany({
       where: { roomId: room.id, userId },
-      data: { initialChipsConfirmed: true }
+      data: { initialChipsConfirmed: true, readyStatus: true }
     });
+    await this.refreshReadyStatus(room.id);
+    return this.getRoomStateByCode(roomCode);
+  }
+
+  async setInitialChips(userId: string, roomCode: string, chips: number) {
+    await this.assertUserCanUsePractice(userId);
+    const room = await this.getByRoomCode(roomCode);
+    this.assertRoomCanChangeWaitingState(room.status);
+    await this.assertRoomPlayer(room.id, userId);
+    await this.prisma.$transaction([
+      this.prisma.practiceRoomPlayer.updateMany({ where: { roomId: room.id }, data: { initialChipsConfirmed: false, readyStatus: false } }),
+      this.prisma.practiceRoomPlayer.updateMany({ where: { roomId: room.id, userId }, data: { chips, chipsSetByPlayer: true } })
+    ]);
     await this.refreshReadyStatus(room.id);
     return this.getRoomStateByCode(roomCode);
   }

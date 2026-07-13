@@ -8,6 +8,7 @@ import { CreatePracticeRoomDto } from "./dto/create-practice-room.dto";
 import { CreateSoloPracticeDto } from "./dto/create-solo-practice.dto";
 import { JoinPracticeRoomDto } from "./dto/join-practice-room.dto";
 import { ReadyPracticeRoomDto } from "./dto/ready-practice-room.dto";
+import { SetInitialChipsDto } from "./dto/set-initial-chips.dto";
 import { PracticeRoomService } from "./practice-room.service";
 
 @ApiTags("Practice Room")
@@ -42,6 +43,11 @@ export class PracticeRoomController {
   @Post("rooms/:roomCode/confirm-initial-chips")
   confirmInitialChips(@CurrentUser() user: RequestUser, @Param("roomCode") roomCode: string) {
     return this.practiceRoomService.confirmInitialChips(user.id, roomCode);
+  }
+
+  @Post("rooms/:roomCode/initial-chips")
+  setInitialChips(@CurrentUser() user: RequestUser, @Param("roomCode") roomCode: string, @Body() dto: SetInitialChipsDto) {
+    return this.practiceRoomService.setInitialChips(user.id, roomCode, dto.chips);
   }
 
   @Post("rooms/:roomCode/ready")

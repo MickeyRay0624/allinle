@@ -12,6 +12,7 @@ Page({
         isOwner: false,
         myConfirmChips: false,
         myReady: false,
+        myChips: "",
         canStart: false,
         starting: false,
         lastMessage: ""
@@ -76,17 +77,37 @@ Page({
     updateRoomState(room) {
         if (!room)
             return;
-        const userId = index_1.store.getState().user?.id || "";
+        const userId = (wx.getStorageSync("user") || {}).id || index_1.store.getState().user?.id || "";
         const myPlayer = room.players?.find((p) => p.userId === userId);
         const allReady = room.players?.every((p) => p.initialChipsConfirmed && p.readyStatus);
         this.setData({
             room,
             connected: true,
-            isOwner: room.ownerId === userId,
+            isOwner: room.ownerUserId === userId,
+            myChips: myPlayer?.chipsSetByPlayer ? String(myPlayer.chips) : this.data.myChips,
             myConfirmChips: myPlayer?.initialChipsConfirmed || false,
             myReady: myPlayer?.readyStatus || false,
-            canStart: allReady && room.players?.length >= 2 && room.ownerId === userId
+            canStart: allReady && room.players?.length >= 2 && room.ownerUserId === userId
         });
+    },
+    onChipsInput(event) {
+        this.setData({ myChips: event.detail.value });
+    },
+    async saveChips() {
+        const chips = Number(this.data.myChips);
+        if (!Number.isInteger(chips) || chips <= 0) {
+            wx.showToast({ title: "请输入正整数筹码", icon: "none" });
+            return;
+        }
+        try {
+            const room = await request_1.api.post(`/practice/rooms/${this.data.roomCode}/initial-chips`, { chips });
+            this.updateRoomState(room);
+            socket_1.practiceRoomSocket.joinRoom(this.data.roomCode);
+            wx.showToast({ title: "筹码已提交", icon: "success" });
+        }
+        catch (error) {
+            this.showError(error);
+        }
     },
     navigateToTable(room) {
         if (isNavigatingToTable)

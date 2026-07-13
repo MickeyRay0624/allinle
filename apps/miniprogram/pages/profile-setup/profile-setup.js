@@ -5,11 +5,21 @@ Page({
     data: {
         nickname: "",
         saving: false,
+        avatarUrl: "",
+        wechatId: "",
     },
     onLoad() {
         const user = wx.getStorageSync("user") || {};
         const nickname = user.nickname === "微信用户" ? "" : (user.nickname || "");
-        this.setData({ nickname });
+        const openid = String(user.openid || "");
+        this.setData({ nickname, avatarUrl: user.avatarUrl || "", wechatId: openid ? `${openid.slice(0, 6)}…${openid.slice(-4)}` : "已通过微信认证" });
+    },
+    useWechatProfile() {
+        wx.getUserProfile({
+            desc: "用于好友练习房展示昵称和头像",
+            success: (result) => this.setData({ nickname: result.userInfo?.nickName || this.data.nickname, avatarUrl: result.userInfo?.avatarUrl || "" }),
+            fail: () => wx.showToast({ title: "你可以继续使用自定义昵称", icon: "none" })
+        });
     },
     onNicknameInput(event) {
         this.setData({ nickname: event.detail.value });
@@ -28,7 +38,7 @@ Page({
             return;
         this.setData({ saving: true });
         try {
-            const user = await request_1.api.patch("/users/me", { nickname });
+            const user = await request_1.api.patch("/users/me", { nickname, avatarUrl: this.data.avatarUrl || undefined });
             wx.setStorageSync("user", user);
             const app = getApp();
             app.globalData.user = user;

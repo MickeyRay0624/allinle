@@ -5,7 +5,7 @@
   <!-- 房间信息 -->
   <view wx:if="{{room}}" class="section card">
     <view class="card-title">{{room.status === 'WAITING' ? '等待中' : room.status === 'READY' ? '已就绪' : '练习中'}}</view>
-    <view class="card-desc">盲注 {{room.smallBlind}} / {{room.bigBlind}} · 初始练习筹码 {{room.initialPracticeChips}} · 最大 {{room.maxPlayers}} 人</view>
+    <view class="card-desc">盲注 {{room.smallBlind}} / {{room.bigBlind}} · 每人自行填写带入筹码 · 最大 {{room.maxPlayers}} 人</view>
   </view>
 
   <!-- 成员列表 -->
@@ -21,7 +21,7 @@
           </view>
         </view>
         <view class="member-right">
-          <view class="member-chips">练习筹码 {{item.chips}}</view>
+          <view class="member-chips">{{item.chipsSetByPlayer ? '带入筹码 ' + item.chips : '尚未填写筹码'}}</view>
           <view class="member-status">
             <text class="status-item {{item.initialChipsConfirmed ? 'done' : 'pending'}}">
               {{item.initialChipsConfirmed ? '✓ 已确认' : '○ 待确认'}}
@@ -36,13 +36,17 @@
     <view class="notice" wx:if="{{lastMessage}}">{{lastMessage}}</view>
   </view>
 
+  <view wx:if="{{room && room.status !== 'PLAYING'}}" class="section card">
+    <view class="card-title">我的带入筹码</view>
+    <t-input value="{{myChips}}" type="number" placeholder="请输入正整数" bindchange="onChipsInput" />
+    <t-button theme="primary" block bindtap="saveChips">提交/修改筹码</t-button>
+    <view class="card-desc">任何人修改筹码后，所有成员都需要重新核对确认。</view>
+  </view>
+
   <!-- 非房主等待阶段 -->
   <view wx:if="{{room && room.status !== 'PLAYING' && !isOwner}}" class="section">
     <view class="button-stack">
-      <t-button theme="warning" block bindtap="confirmChips" disabled="{{myConfirmChips}}">确认初始练习筹码</t-button>
-      <t-button theme="warning" block bindtap="toggleReady">
-        {{myReady ? '取消准备' : '准备'}}
-      </t-button>
+      <t-button theme="warning" block bindtap="confirmChips" disabled="{{myConfirmChips}}">核对无误并确认准备</t-button>
     </view>
     <view wx:if="{{myConfirmChips && myReady}}" class="hint-box">
       <text class="hint-text">✅ 已就绪，等待房主开始练习</text>
@@ -52,10 +56,7 @@
   <!-- 房主操作 -->
   <view wx:if="{{room && room.status !== 'PLAYING' && isOwner}}" class="section">
     <view class="button-stack">
-      <t-button theme="warning" block bindtap="confirmChips" disabled="{{myConfirmChips}}">确认初始练习筹码</t-button>
-      <t-button theme="warning" block bindtap="toggleReady">
-        {{myReady ? '取消准备' : '准备'}}
-      </t-button>
+      <t-button theme="warning" block bindtap="confirmChips" disabled="{{myConfirmChips}}">核对无误并确认准备</t-button>
       <t-button theme="warning" block bindtap="startRoom" disabled="{{starting || !canStart}}">
         {{starting ? '正在开始...' : '开始练习'}}
       </t-button>
