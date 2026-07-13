@@ -1,4 +1,4 @@
-import { wechatLogin, devLogin, getToken, setToken } from "./utils/request";
+import { wechatLogin, devLogin, getToken, setToken, isDevVersion } from "./utils/request";
 
 App({
   globalData: {
@@ -18,8 +18,12 @@ App({
   async doLogin() {
     try {
       await wechatLogin();
-    } catch {
-      console.warn("微信登录失败，尝试开发登录...");
+    } catch (error) {
+      if (!isDevVersion()) {
+        console.error("微信登录失败", error);
+        return;
+      }
+      console.warn("微信登录失败，尝试本地开发登录...");
       try {
         const result = await devLogin("测试用户");
         if (result?.token) {

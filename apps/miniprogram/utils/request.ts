@@ -1,5 +1,9 @@
 const API_BASE = "https://api.poker.lmqstudio.com/api";
 
+function usesLocalApi(): boolean {
+  return /^https?:\/\/(localhost|127\.0\.0\.1|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(API_BASE);
+}
+
 interface RequestOptions {
   url: string;
   method?: "GET" | "POST" | "PATCH" | "DELETE";
@@ -122,7 +126,7 @@ export async function ensureDevLogin() {
   const token = getToken();
   if (token) return token;
 
-  const result = await devLogin();
+  const result = usesLocalApi() ? await devLogin() : await wechatLogin();
   if (result?.token) {
     setToken(result.token);
     if (result.user) wx.setStorageSync("user", result.user);
@@ -139,6 +143,9 @@ const TEST_USERS = [
 
 let testUserIndex = 0;
 export async function switchDevLogin() {
+  if (!usesLocalApi()) {
+    throw new Error("正式环境请使用不同微信账号测试");
+  }
   testUserIndex = (testUserIndex + 1) % TEST_USERS.length;
   const nickname = TEST_USERS[testUserIndex];
 
@@ -161,7 +168,7 @@ export const api = {
 export function isDevVersion(): boolean {
   try {
     const info = wx.getAccountInfoSync();
-    return info.miniProgram.envVersion !== "release";
+    return usesLocalApi() && info.miniProgram.envVersion !== "release";
   } catch {
     return false;
   }

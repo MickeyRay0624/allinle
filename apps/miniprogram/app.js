@@ -18,8 +18,12 @@ App({
         try {
             await (0, request_1.wechatLogin)();
         }
-        catch {
-            console.warn("微信登录失败，尝试开发登录...");
+        catch (error) {
+            if (!(0, request_1.isDevVersion)()) {
+                console.error("微信登录失败", error);
+                return;
+            }
+            console.warn("微信登录失败，尝试本地开发登录...");
             try {
                 const result = await (0, request_1.devLogin)("测试用户");
                 if (result?.token) {
