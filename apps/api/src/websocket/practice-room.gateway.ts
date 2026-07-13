@@ -200,7 +200,11 @@ export class PracticeRoomGateway implements OnGatewayConnection {
   }
 
   @SubscribeMessage("heartbeat")
-  heartbeat(@ConnectedSocket() client: Socket) {
+  async heartbeat(@ConnectedSocket() client: Socket) {
+    const roomCodes = [...client.rooms].filter((roomCode) => roomCode !== client.id);
+    if (roomCodes.length) {
+      await this.practiceRoomService.touchRooms(roomCodes);
+    }
     client.emit("heartbeat", { ts: Date.now() });
   }
 

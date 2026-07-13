@@ -77,6 +77,17 @@ export class PracticeRoomService {
     return this.serializeRoom(room);
   }
 
+  async touchRooms(roomCodes: string[]) {
+    if (!roomCodes.length) return;
+    await this.prisma.practiceRoom.updateMany({
+      where: {
+        roomCode: { in: roomCodes },
+        status: { in: [PracticeRoomStatus.WAITING, PracticeRoomStatus.READY, PracticeRoomStatus.PLAYING] }
+      },
+      data: { updatedAt: new Date() }
+    });
+  }
+
   async getRoomStateById(roomId: string) {
     const room = await this.prisma.practiceRoom.findUnique({
       where: { id: roomId },

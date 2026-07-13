@@ -68,7 +68,14 @@ Page({ data: { mode: "", room: null, roomCodeInput: "", titleInput: "", tempName
         wx.showToast({ title: "你已确认本手", icon: "none" });
         return;
     } await request_1.api.post(`/team-ledger/rooms/${this.data.roomCodeInput}/hands/${h.handNo}/confirm`, {}); this.setData({ myConfirmed: true, confirmationCount: Math.min(this.data.confirmationCount + 1, this.data.confirmationTotal) }); wx.showToast({ title: "本手已确认", icon: "success" }); await this.refreshRoom(); }, async disputeHand() { const h = this.data.currentHand; await request_1.api.post(`/team-ledger/rooms/${this.data.roomCodeInput}/hands/${h.handNo}/dispute`, { note: this.data.disputeNote }); this.setData({ balance: { total: 0, isBalanced: true, allSubmitted: false, submittedCount: 0, totalCount: this.data.confirmationTotal } }); await this.refreshRoom(); },
-    async loadSummary() { this.setData({ summary: await request_1.api.get(`/team-ledger/rooms/${this.data.roomCodeInput}/summary`) }); }, async loadSettlement() { this.setData({ settlements: await request_1.api.post(`/team-ledger/rooms/${this.data.roomCodeInput}/settlement`, {}) }); }, async endRoom() { await request_1.api.post(`/team-ledger/rooms/${this.data.roomCodeInput}/end`, {}); await this.refreshRoom(); await this.loadSummary(); }, leaveRoom() { if (timer) {
+    async loadSummary() { this.setData({ summary: await request_1.api.get(`/team-ledger/rooms/${this.data.roomCodeInput}/summary`) }); }, async loadSettlement() { try {
+        const settlements = await request_1.api.post(`/team-ledger/rooms/${this.data.roomCodeInput}/settlement`, {});
+        this.setData({ settlements });
+        wx.showToast({ title: settlements.length ? `已生成 ${settlements.length} 条结算建议` : "当前无需互相结算", icon: "none" });
+    }
+    catch (e) {
+        wx.showToast({ title: e.message || "生成结算失败", icon: "none" });
+    } }, async endRoom() { await request_1.api.post(`/team-ledger/rooms/${this.data.roomCodeInput}/end`, {}); await this.refreshRoom(); await this.loadSummary(); }, leaveRoom() { if (timer) {
         clearInterval(timer);
         timer = null;
     } this.setData({ mode: "", room: null, currentHand: null, summary: null }); } });

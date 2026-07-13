@@ -14,7 +14,7 @@ import { TeamLedgerService } from "./team-ledger.service";
 export class TeamLedgerController {
   constructor(private readonly service: TeamLedgerService) {}
   @Post("rooms") createRoom(@CurrentUser() user: RequestUser, @Body() dto: CreateTeamLedgerRoomDto) { return this.service.createRoom(user.id, dto); }
-  @Get("rooms/:roomCode") getRoom(@Param("roomCode") roomCode: string) { return this.service.getRoom(roomCode); }
+  @Get("rooms/:roomCode") async getRoom(@Param("roomCode") roomCode: string) { await this.service.touchRoom(roomCode); return this.service.getRoom(roomCode); }
   @Post("rooms/:roomCode/join") joinRoom(@CurrentUser() user: RequestUser, @Param("roomCode") roomCode: string, @Body() dto: JoinTeamLedgerRoomDto) { return this.service.joinRoom(user.id, roomCode, dto); }
   @Post("rooms/:roomCode/add-temp") addTempParticipant(@CurrentUser() user: RequestUser, @Param("roomCode") roomCode: string, @Body() dto: { displayName: string }) { return this.service.addTempParticipant(user.id, roomCode, dto.displayName); }
   @Post("rooms/:roomCode/start") startRoom(@CurrentUser() user: RequestUser, @Param("roomCode") roomCode: string) { return this.service.startRoom(user.id, roomCode); }

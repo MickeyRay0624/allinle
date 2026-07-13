@@ -8,6 +8,7 @@ class PracticeRoomSocket {
     constructor() {
         this.currentRoomCode = null;
         this.reconnectHandlers = [];
+        this.heartbeatTimer = null;
     }
     connect() {
         if (this.socket?.connected)
@@ -29,9 +30,11 @@ class PracticeRoomSocket {
                 if (this.currentRoomCode) {
                     this.joinRoom(this.currentRoomCode);
                 }
+                this.startHeartbeat();
             });
             this.socket.on("disconnect", (reason) => {
                 console.log("[WS] disconnected:", reason);
+                this.stopHeartbeat();
             });
             this.socket.on("reconnect", () => {
                 console.log("[WS] reconnected");
@@ -96,6 +99,7 @@ class PracticeRoomSocket {
         return this.socket?.connected ?? false;
     }
     close() {
+        this.stopHeartbeat();
         if (this.socket) {
             this.socket.removeAllListeners();
             this.socket.close();
@@ -103,6 +107,18 @@ class PracticeRoomSocket {
         }
         this.currentRoomCode = null;
         this.reconnectHandlers = [];
+    }
+    startHeartbeat() {
+        this.stopHeartbeat();
+        this.heartbeatTimer = setInterval(() => {
+            if (this.socket?.connected && this.currentRoomCode)
+                this.socket.emit("heartbeat");
+        }, 20000);
+    }
+    stopHeartbeat() {
+        if (this.heartbeatTimer !== null)
+            clearInterval(this.heartbeatTimer);
+        this.heartbeatTimer = null;
     }
 }
 exports.PracticeRoomSocket = PracticeRoomSocket;

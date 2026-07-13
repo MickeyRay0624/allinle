@@ -41,6 +41,8 @@ const DEFAULT_SYSTEM_CONFIG = {
   botDifficulties: ["BEGINNER", "NORMAL", "ADVANCED"],
 };
 
+const ROOM_IDLE_TIMEOUT_MS = 15 * 60 * 1000;
+
 @Injectable()
 export class AdminService {
   constructor(
@@ -321,6 +323,11 @@ export class AdminService {
   }
 
   async listPracticeRooms() {
+    const idleBefore = new Date(Date.now() - ROOM_IDLE_TIMEOUT_MS);
+    await this.prisma.practiceRoom.updateMany({
+      where: { status: { in: [PracticeRoomStatus.WAITING, PracticeRoomStatus.READY, PracticeRoomStatus.PLAYING] }, updatedAt: { lt: idleBefore } },
+      data: { status: PracticeRoomStatus.CLOSED, endedAt: new Date() }
+    });
     return this.prisma.practiceRoom.findMany({
       include: {
         owner: { select: { id: true, nickname: true, openid: true } },
@@ -454,6 +461,11 @@ export class AdminService {
   // ---- Team Ledger Rooms ----
 
   async listTeamLedgerRooms() {
+    const idleBefore = new Date(Date.now() - ROOM_IDLE_TIMEOUT_MS);
+    await this.prisma.teamLedgerRoom.updateMany({
+      where: { status: { in: ["WAITING", "ACTIVE"] } as any, updatedAt: { lt: idleBefore } },
+      data: { status: "CLOSED", endedAt: new Date() } as any,
+    });
     return this.prisma.teamLedgerRoom.findMany({
       include: {
         owner: { select: { id: true, nickname: true, openid: true } },
