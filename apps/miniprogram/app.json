@@ -30,5 +30,6 @@
     "t-notice-bar": "tdesign-miniprogram/notice-bar/notice-bar",
     "poker-card": "/components/poker-card/index"
   },
-  "sitemapLocation": "sitemap.json"
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
 }
