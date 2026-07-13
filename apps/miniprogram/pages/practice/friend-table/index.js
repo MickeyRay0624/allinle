@@ -51,7 +51,7 @@ Page({
     var roomCode = query.roomCode || "";
     this.setData({ roomCode: roomCode });
     await ensureDevLogin();
-    var user = store.getState().user || {};
+    var user = wx.getStorageSync("user") || store.getState().user || {};
     this.setData({ userId: user.id || "" });
 
     await this.loadGameState(true);

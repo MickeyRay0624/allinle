@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const request_1 = require("../../utils/request");
+let replayPollTimer = null;
 Page({
     data: {
         handId: "",
@@ -14,6 +15,29 @@ Page({
             roomCode: query.roomCode || ""
         });
         await this.loadReplay();
+        this.startRoomPolling();
+    },
+    onUnload() {
+        if (replayPollTimer !== null)
+            clearInterval(replayPollTimer);
+        replayPollTimer = null;
+    },
+    startRoomPolling() {
+        if (replayPollTimer !== null)
+            clearInterval(replayPollTimer);
+        replayPollTimer = setInterval(async () => {
+            const roomCode = this.data.replay?.roomCode || this.data.roomCode;
+            if (!roomCode || !this.data.replay)
+                return;
+            try {
+                const gameView = await request_1.api.get(`/practice/rooms/${roomCode}/game-state`);
+                const currentHandNo = Number(gameView?.publicState?.handNo || 0);
+                if (gameView?.publicState?.status === "PLAYING" && currentHandNo > Number(this.data.replay.handNo || 0)) {
+                    wx.redirectTo({ url: `/pages/practice/friend-table/index?roomCode=${roomCode}` });
+                }
+            }
+            catch (_) { }
+        }, 2000);
     },
     async loadReplay() {
         try {
@@ -36,6 +60,6 @@ Page({
             wx.navigateBack();
             return;
         }
-        wx.navigateTo({ url: `/pages/practice-room/practice-room?roomCode=${this.data.replay.roomCode}` });
+        wx.redirectTo({ url: `/pages/practice/friend-table/index?roomCode=${this.data.replay.roomCode}` });
     }
 });
