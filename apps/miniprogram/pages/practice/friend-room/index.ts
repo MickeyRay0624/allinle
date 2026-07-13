@@ -3,6 +3,7 @@ import { practiceRoomSocket } from "../../../utils/socket";
 import { store } from "../../../store/index";
 
 let isNavigatingToTable = false;
+let roomPollTimer: number | null = null;
 
 Page({
   data: {
@@ -25,13 +26,28 @@ Page({
     await ensureDevLogin();
     await this.loadRoom();
     this.connectSocket();
+    this.startRoomPolling();
   },
 
   onUnload() {
+    if (roomPollTimer !== null) clearInterval(roomPollTimer);
+    roomPollTimer = null;
     if (this.data.roomCode) {
       practiceRoomSocket.leaveRoom(this.data.roomCode);
     }
     practiceRoomSocket.close();
+  },
+
+  startRoomPolling() {
+    if (roomPollTimer !== null) clearInterval(roomPollTimer);
+    roomPollTimer = setInterval(async () => {
+      if (isNavigatingToTable || !this.data.roomCode) return;
+      try {
+        const room = await api.get<any>(`/practice/rooms/${this.data.roomCode}`);
+        this.updateRoomState(room);
+        if (room.status === "PLAYING") this.navigateToTable(room);
+      } catch (_) {}
+    }, 2000) as any;
   },
 
   async loadRoom() {
@@ -92,7 +108,7 @@ Page({
     const allReady = room.players?.every((p: any) => p.initialChipsConfirmed && p.readyStatus);
     this.setData({
       room,
-      connected: true,
+      connected: practiceRoomSocket.isConnected(),
       isOwner: room.ownerUserId === userId,
       myChips: myPlayer?.chipsSetByPlayer ? String(myPlayer.chips) : this.data.myChips,
       myConfirmChips: myPlayer?.initialChipsConfirmed || false,

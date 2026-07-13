@@ -4,6 +4,7 @@ const request_1 = require("../../../utils/request");
 const socket_1 = require("../../../utils/socket");
 const index_1 = require("../../../store/index");
 let isNavigatingToTable = false;
+let roomPollTimer = null;
 Page({
     data: {
         roomCode: "",
@@ -24,12 +25,31 @@ Page({
         await (0, request_1.ensureDevLogin)();
         await this.loadRoom();
         this.connectSocket();
+        this.startRoomPolling();
     },
     onUnload() {
+        if (roomPollTimer !== null)
+            clearInterval(roomPollTimer);
+        roomPollTimer = null;
         if (this.data.roomCode) {
             socket_1.practiceRoomSocket.leaveRoom(this.data.roomCode);
         }
         socket_1.practiceRoomSocket.close();
+    },
+    startRoomPolling() {
+        if (roomPollTimer !== null)
+            clearInterval(roomPollTimer);
+        roomPollTimer = setInterval(async () => {
+            if (isNavigatingToTable || !this.data.roomCode)
+                return;
+            try {
+                const room = await request_1.api.get(`/practice/rooms/${this.data.roomCode}`);
+                this.updateRoomState(room);
+                if (room.status === "PLAYING")
+                    this.navigateToTable(room);
+            }
+            catch (_) { }
+        }, 2000);
     },
     async loadRoom() {
         if (!this.data.roomCode)
@@ -82,7 +102,7 @@ Page({
         const allReady = room.players?.every((p) => p.initialChipsConfirmed && p.readyStatus);
         this.setData({
             room,
-            connected: true,
+            connected: socket_1.practiceRoomSocket.isConnected(),
             isOwner: room.ownerUserId === userId,
             myChips: myPlayer?.chipsSetByPlayer ? String(myPlayer.chips) : this.data.myChips,
             myConfirmChips: myPlayer?.initialChipsConfirmed || false,
