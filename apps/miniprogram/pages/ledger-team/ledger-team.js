@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const request_1 = require("../../utils/request");
 let timer = null;
-Page({ data: { mode: "", room: null, roomCodeInput: "", titleInput: "", tempNameInput: "", showCreateForm: false, showJoinForm: false, showTempPlayerForm: false, myWinEntry: "", myLossEntry: "", disputeNote: "", currentHand: null, isOwner: false, myParticipantId: "", summary: null, isBuyInPhase: false, allHaveBuyIn: false, myBuyIn: "", balance: null, settlements: [], myConfirmed: false, confirmationCount: 0, confirmationTotal: 0 },
+Page({ data: { mode: "", room: null, roomCodeInput: "", titleInput: "", tempNameInput: "", showCreateForm: false, showJoinForm: false, showTempPlayerForm: false, myWinEntry: "", myLossEntry: "", disputeNote: "", currentHand: null, isOwner: false, myParticipantId: "", summary: null, isBuyInPhase: false, allHaveBuyIn: false, myBuyIn: "", balance: null, settlements: [], myConfirmed: false, confirmationCount: 0, confirmationTotal: 0, showMyBalance: false, myBalance: 0, myBalanceBuyIn: 0, myBalanceNet: 0 },
     onLoad(o) { if (o.roomCode)
         this.setData({ mode: "room", roomCodeInput: o.roomCode }); }, onShow() { this.loadData(); }, onUnload() { if (timer)
         clearInterval(timer); },
@@ -18,9 +18,11 @@ Page({ data: { mode: "", room: null, roomCodeInput: "", titleInput: "", tempName
         const submittedEntries = currentHand?.entries?.filter((entry) => entry.status === "SUBMITTED" || entry.status === "CONFIRMED") || [];
         const total = submittedEntries.reduce((sum, entry) => sum + Number(entry.amount), 0);
         const myEntry = currentHand?.entries?.find((entry) => entry.participantId === me?.id);
+        const myBalanceBuyIn = Number(me?.buyInAmount || 0);
+        const myBalanceNet = (room.hands || []).reduce((sum, hand) => { const entry = hand.entries?.find((item) => item.participantId === me?.id); const counts = hand.status === "LOCKED" || (hand.id === currentHand?.id && (entry?.status === "SUBMITTED" || entry?.status === "CONFIRMED")); return counts && entry ? sum + Number(entry.amount) : sum; }, 0);
         const isBuyInPhase = room.status === "ACTIVE" && room.currentHandNo === 0;
         const balance = currentHand ? { total, isBalanced: total === 0, allSubmitted: submittedEntries.length === activeParticipants.length, submittedCount: submittedEntries.length, totalCount: activeParticipants.length } : null;
-        const nextData = { room, currentHand, balance, isOwner: room.ownerUserId === uid, myParticipantId: me?.id || "", isBuyInPhase, allHaveBuyIn: activeParticipants.every((p) => p.buyInAmount !== null && p.buyInAmount !== undefined), myConfirmed: myEntry?.status === "CONFIRMED", confirmationCount: confirmedEntries.length, confirmationTotal: activeParticipants.length };
+        const nextData = { room, currentHand, balance, isOwner: room.ownerUserId === uid, myParticipantId: me?.id || "", isBuyInPhase, allHaveBuyIn: activeParticipants.every((p) => p.buyInAmount !== null && p.buyInAmount !== undefined), myConfirmed: myEntry?.status === "CONFIRMED", confirmationCount: confirmedEntries.length, confirmationTotal: activeParticipants.length, myBalanceBuyIn, myBalanceNet, myBalance: myBalanceBuyIn + myBalanceNet };
         if (me?.buyInAmount !== null && me?.buyInAmount !== undefined)
             nextData.myBuyIn = String(me.buyInAmount);
         this.setData(nextData);
@@ -41,8 +43,15 @@ Page({ data: { mode: "", room: null, roomCodeInput: "", titleInput: "", tempName
     } await request_1.api.post(`/team-ledger/rooms/${this.data.roomCodeInput}/buy-in`, { buyInAmount: amount }); wx.showToast({ title: "带入筹码已确认", icon: "success" }); await this.refreshRoom(); },
     async submitEntry() { const h = this.data.currentHand; if (!h)
         return; const n = this.data.myWinEntry ? Number(this.data.myWinEntry) : -Number(this.data.myLossEntry); await request_1.api.post(`/team-ledger/rooms/${this.data.roomCodeInput}/hands/${h.handNo}/entry`, { amount: n }); this.setData({ myWinEntry: "", myLossEntry: "" }); await this.refreshRoom(); await this.checkBalance(); },
-    async checkBalance() { const h = this.data.currentHand; if (h)
-        this.setData({ balance: await request_1.api.get(`/team-ledger/rooms/${this.data.roomCodeInput}/hands/${h.handNo}/balance`) }); }, async requestConfirmation() { const h = this.data.currentHand; if (!this.data.balance?.allSubmitted) {
+    async checkBalance() { const h = this.data.currentHand; if (!h)
+        return; try {
+        const balance = await request_1.api.get(`/team-ledger/rooms/${this.data.roomCodeInput}/hands/${h.handNo}/balance`);
+        this.setData({ balance, showMyBalance: true });
+        wx.showToast({ title: "余额已更新", icon: "success" });
+    }
+    catch (e) {
+        wx.showToast({ title: e.message || "余额查询失败", icon: "none" });
+    } }, async requestConfirmation() { const h = this.data.currentHand; if (!this.data.balance?.allSubmitted) {
         wx.showToast({ title: "还有参与者未提交金额", icon: "none" });
         return;
     } if (!this.data.balance?.isBalanced) {

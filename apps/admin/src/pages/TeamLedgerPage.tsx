@@ -209,6 +209,78 @@ export function TeamLedgerPage() {
             />
 
             <Typography.Title level={5} style={{ marginTop: 16 }}>
+              手牌与异议记录
+            </Typography.Title>
+            <Table
+              dataSource={detailRoom.hands || []}
+              rowKey="id"
+              size="small"
+              pagination={false}
+              expandable={{
+                expandedRowRender: (hand: any) => (
+                  <Table
+                    dataSource={hand.entries || []}
+                    rowKey="id"
+                    size="small"
+                    pagination={false}
+                    columns={[
+                      {
+                        title: "玩家",
+                        key: "participant",
+                        render: (_: any, entry: any) => entry.participant?.displayName || "-",
+                      },
+                      {
+                        title: "本手金额",
+                        dataIndex: "amount",
+                        key: "amount",
+                        render: (amount: any) => {
+                          const value = Number(amount);
+                          return `${value >= 0 ? "+" : ""}${value}`;
+                        },
+                      },
+                      {
+                        title: "提交/确认状态",
+                        dataIndex: "status",
+                        key: "status",
+                        render: (status: string) => (
+                          <Tag color={status === "DISPUTED" ? "red" : status === "CONFIRMED" ? "green" : "blue"}>
+                            {status}
+                          </Tag>
+                        ),
+                      },
+                      {
+                        title: "异议原因",
+                        dataIndex: "disputeNote",
+                        key: "disputeNote",
+                        render: (note: string | null) => note || "-",
+                      },
+                    ]}
+                  />
+                ),
+              }}
+              columns={[
+                { title: "手数", dataIndex: "handNo", key: "handNo", render: (value: number) => `第 ${value} 手` },
+                {
+                  title: "状态",
+                  dataIndex: "status",
+                  key: "status",
+                  render: (status: string) => (
+                    <Tag color={status === "DISPUTED" ? "red" : status === "LOCKED" ? "green" : "blue"}>
+                      {status}
+                    </Tag>
+                  ),
+                },
+                { title: "记录数", key: "entries", render: (_: any, hand: any) => hand.entries?.length || 0 },
+                {
+                  title: "锁定时间",
+                  dataIndex: "lockedAt",
+                  key: "lockedAt",
+                  render: (value: string | null) => value ? new Date(value).toLocaleString("zh-CN") : "-",
+                },
+              ]}
+            />
+
+            <Typography.Title level={5} style={{ marginTop: 16 }}>
               结算建议
             </Typography.Title>
             {detailRoom.settlements && detailRoom.settlements.length > 0 ? (
