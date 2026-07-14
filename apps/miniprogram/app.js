@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const request_1 = require("./utils/request");
-let checkingNickname = false;
+let checkingProfile = false;
 App({
     globalData: {
         token: "",
@@ -18,12 +18,12 @@ App({
     onShow() {
         wx.showShareMenu({ menus: ["shareAppMessage", "shareTimeline"] });
         if ((0, request_1.getToken)())
-            this.checkNickname();
+            this.refreshProfile();
     },
     async doLogin() {
         try {
             await (0, request_1.wechatLogin)();
-            await this.checkNickname();
+            await this.refreshProfile();
         }
         catch (error) {
             if (!(0, request_1.isDevVersion)()) {
@@ -50,27 +50,20 @@ App({
     reLogin() {
         this.doLogin();
     },
-    async checkNickname() {
-        if (checkingNickname || !(0, request_1.getToken)())
+    async refreshProfile() {
+        if (checkingProfile || !(0, request_1.getToken)())
             return;
-        checkingNickname = true;
+        checkingProfile = true;
         try {
             const user = await request_1.api.get("/users/me");
             wx.setStorageSync("user", user);
             this.globalData.user = user;
-            const nickname = String(user?.nickname || "").trim();
-            const needsSetup = !nickname || nickname === "微信用户" || nickname === "测试用户";
-            const pages = getCurrentPages();
-            const currentRoute = pages[pages.length - 1]?.route || "";
-            if (needsSetup && currentRoute !== "pages/profile-setup/profile-setup") {
-                setTimeout(() => wx.navigateTo({ url: "/pages/profile-setup/profile-setup" }), 200);
-            }
         }
         catch (error) {
-            console.error("检查昵称失败", error);
+            console.error("刷新用户资料失败", error);
         }
         finally {
-            checkingNickname = false;
+            checkingProfile = false;
         }
     },
 });

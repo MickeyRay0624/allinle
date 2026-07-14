@@ -1,15 +1,17 @@
 <view class="page">
-  <view class="title">设置你的昵称</view>
-  <view class="subtitle">好友练习和团队记账时，其他成员将通过昵称识别你。</view>
+  <view class="title">完善个人资料（可选）</view>
+  <view class="subtitle">头像和昵称仅用于在团队记账与练习房中区分成员，可暂不设置。</view>
   <view class="section card">
     <view class="card-desc">微信身份：{{wechatId}}</view>
     <image wx:if="{{avatarUrl}}" class="profile-avatar" src="{{avatarUrl}}" mode="aspectFill" />
-    <button class="avatar-button" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">选择微信头像</button>
+    <button class="avatar-button" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">选择头像（可选）</button>
     <t-button variant="outline" block bindtap="chooseCustomAvatar">从相册上传头像</t-button>
     <view class="preset-row"><image wx:for="{{presetAvatars}}" wx:key="*this" class="preset-avatar {{avatarUrl === item ? 'selected' : ''}}" src="{{item}}" data-url="{{item}}" bindtap="selectPreset" /></view>
-    <view class="label">昵称</view>
+    <view class="label">昵称（可选）</view>
     <input class="nickname-input" type="nickname" value="{{nickname}}" maxlength="20" placeholder="使用微信昵称或输入自定义昵称" bindinput="onNicknameInput" />
     <view class="tip">不采用微信资料时，可自行填写昵称；设置后仍可在“我的”页面修改。</view>
-    <t-button theme="primary" block loading="{{saving}}" disabled="{{saving}}" bindtap="saveNickname">保存并继续</t-button>
+    <t-button theme="primary" block loading="{{saving}}" disabled="{{saving}}" bindtap="saveNickname">保存资料</t-button>
+    <view class="button-gap"></view>
+    <t-button variant="outline" block disabled="{{saving}}" bindtap="skipSetup">暂不设置，返回首页</t-button>
   </view>
 </view>

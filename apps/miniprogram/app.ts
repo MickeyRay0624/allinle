@@ -1,6 +1,6 @@
 import { wechatLogin, devLogin, getToken, setToken, isDevVersion, api } from "./utils/request";
 
-let checkingNickname = false;
+let checkingProfile = false;
 
 App({
   globalData: {
@@ -19,13 +19,13 @@ App({
 
   onShow() {
     wx.showShareMenu({ menus: ["shareAppMessage", "shareTimeline"] });
-    if (getToken()) this.checkNickname();
+    if (getToken()) this.refreshProfile();
   },
 
   async doLogin() {
     try {
       await wechatLogin();
-      await this.checkNickname();
+      await this.refreshProfile();
     } catch (error) {
       if (!isDevVersion()) {
         console.error("微信登录失败", error);
@@ -52,24 +52,17 @@ App({
     this.doLogin();
   },
 
-  async checkNickname() {
-    if (checkingNickname || !getToken()) return;
-    checkingNickname = true;
+  async refreshProfile() {
+    if (checkingProfile || !getToken()) return;
+    checkingProfile = true;
     try {
       const user = await api.get<any>("/users/me");
       wx.setStorageSync("user", user);
       this.globalData.user = user;
-      const nickname = String(user?.nickname || "").trim();
-      const needsSetup = !nickname || nickname === "微信用户" || nickname === "测试用户";
-      const pages = getCurrentPages();
-      const currentRoute = pages[pages.length - 1]?.route || "";
-      if (needsSetup && currentRoute !== "pages/profile-setup/profile-setup") {
-        setTimeout(() => wx.navigateTo({ url: "/pages/profile-setup/profile-setup" }), 200);
-      }
     } catch (error) {
-      console.error("检查昵称失败", error);
+      console.error("刷新用户资料失败", error);
     } finally {
-      checkingNickname = false;
+      checkingProfile = false;
     }
   },
 });

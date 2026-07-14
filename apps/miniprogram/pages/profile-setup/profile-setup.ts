@@ -35,6 +35,12 @@ Page({
     this.setData({ avatarUrl: event.currentTarget.dataset.url });
   },
 
+  skipSetup() {
+    const pages = getCurrentPages();
+    if (pages.length > 1) wx.navigateBack();
+    else wx.reLaunch({ url: "/pages/index/index" });
+  },
+
   onNicknameInput(event: any) {
     this.setData({ nickname: event.detail.value });
   },
@@ -56,7 +62,7 @@ Page({
       wx.setStorageSync("user", user);
       const app = getApp();
       app.globalData.user = user;
-      wx.showToast({ title: "昵称设置成功", icon: "success" });
+      wx.showToast({ title: "资料保存成功", icon: "success" });
       setTimeout(() => {
         const pages = getCurrentPages();
         if (pages.length > 1) wx.navigateBack();
