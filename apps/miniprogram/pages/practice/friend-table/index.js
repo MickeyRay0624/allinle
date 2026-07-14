@@ -417,7 +417,14 @@ Page({
       wx.showToast({ title: "暂无可复盘手牌", icon: "none" });
       return;
     }
-    wx.navigateTo({ url: "/pages/practice-replay/practice-replay?handId=" + handId + "&roomCode=" + this.data.roomCode });
+    // Replace the table page instead of stacking one replay page per hand.
+    // Repeated navigateTo calls eventually hit the Mini Program page-stack limit.
+    wx.redirectTo({
+      url: "/pages/practice-replay/practice-replay?handId=" + handId + "&roomCode=" + this.data.roomCode,
+      fail: function() {
+        wx.showToast({ title: "复盘页面打开失败，请返回房间重试", icon: "none" });
+      }
+    });
   },
 
   leaveTable() {

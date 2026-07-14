@@ -30,6 +30,7 @@
         <block wx:if="{{item.holeCardsHidden}}">
           <view class="poker-card hidden">?</view>
           <view class="poker-card hidden">?</view>
+          <view class="hidden-reason">该玩家未摊牌，底牌按复盘规则隐藏</view>
         </block>
         <block wx:else>
           <view wx:for="{{item.holeCards}}" wx:key="*this" class="poker-card private">{{item}}</view>

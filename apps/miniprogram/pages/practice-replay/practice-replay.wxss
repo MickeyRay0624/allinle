@@ -57,6 +57,15 @@
   border-color: #3a3a3a;
 }
 
+.hidden-reason {
+  display: flex;
+  align-items: center;
+  max-width: 330rpx;
+  color: #8f9792;
+  font-size: 22rpx;
+  line-height: 1.45;
+}
+
 .player-card {
   margin-top: 18rpx;
 }
