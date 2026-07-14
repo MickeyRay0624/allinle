@@ -31,7 +31,7 @@
           wx:key="index"
           card="{{item.card}}"
           faceDown="{{item.faceDown}}"
-          size="normal"
+          size="{{playerCount >= 5 ? 'small' : 'normal'}}"
           dealt="{{item.dealt}}"
         />
       </view>
@@ -49,20 +49,6 @@
         wx:key="seatNo"
         class="seat {{item.isCurrent ? 'current' : ''}} {{item.isTurn ? 'active-turn' : ''}} {{item.status === 'FOLDED' ? 'folded' : ''}} {{item.status === 'ALL_IN' ? 'all-in' : ''}} {{item.status === 'OUT' ? 'out' : ''}} position-{{item.position}}"
       >
-        <!-- 手牌 -->
-        <view class="seat-cards">
-          <poker-card
-            wx:for="{{item.displayCards}}"
-            wx:for-item="card"
-            wx:key="index"
-            card="{{card.card}}"
-            faceDown="{{card.faceDown}}"
-            size="small"
-            faded="{{item.status === 'FOLDED' || item.status === 'OUT'}}"
-            highlight="{{item.isWinner}}"
-          />
-        </view>
-
         <!-- 玩家信息 -->
         <view class="seat-info">
           <text class="seat-name">{{item.nickname || '成员'}}</text>

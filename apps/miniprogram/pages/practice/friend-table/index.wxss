@@ -513,3 +513,77 @@
   padding: 22rpx 24rpx calc(env(safe-area-inset-bottom) + 26rpx);
   background: linear-gradient(180deg, #111713, #070a08);
 }
+
+/* Keep every seat outside the protected community-card zone. */
+.seat-layout,
+.seat-count-2, .seat-count-3, .seat-count-4, .seat-count-5,
+.seat-count-6, .seat-count-7, .seat-count-8, .seat-count-9 {
+  display: block;
+}
+.seat-layout .seat {
+  position: absolute;
+  margin: 0;
+  box-sizing: border-box;
+}
+.seat-layout .position-top {
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+}
+.seat-layout .position-bot {
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+}
+.seat-layout .position-t0 { left: 0; top: 0; }
+.seat-layout .position-t1 { left: 50%; top: 0; transform: translateX(-50%); }
+.seat-layout .position-t2 { right: 0; top: 0; }
+.seat-layout .position-b0 { left: 0; bottom: 0; }
+.seat-layout .position-b1 { left: 50%; bottom: 0; transform: translateX(-50%); }
+.seat-layout .position-b2 { right: 0; bottom: 0; }
+.seat-layout .position-l0 { left: 0; top: 50%; transform: translateY(-50%); }
+.seat-layout .position-r0 { right: 0; top: 42%; transform: translateY(-50%); }
+.seat-layout .position-r1 { right: 0; top: 66%; transform: translateY(-50%); }
+
+/* Count-specific spacing keeps sparse tables balanced. */
+.seat-count-3 .position-t0,
+.seat-count-4 .position-t0 { left: 9%; }
+.seat-count-3 .position-t1,
+.seat-count-4 .position-t1 { left: auto; right: 9%; transform: none; }
+.seat-count-4 .position-b0 { left: 9%; }
+.seat-count-4 .position-b1 { left: auto; right: 9%; transform: none; }
+.seat-count-5 .position-b0 { left: 16%; }
+.seat-count-5 .position-b1 { left: auto; right: 16%; transform: none; }
+
+/* The board sits in a dedicated clear layer above the felt, never under seats. */
+.board-cards {
+  z-index: 15;
+  min-width: 350rpx;
+  min-height: 118rpx;
+  justify-content: center;
+  padding: 12rpx 18rpx;
+  box-sizing: border-box;
+  border-radius: 22rpx;
+  background: rgba(2, 43, 29, 0.52);
+  box-shadow: inset 0 0 24rpx rgba(0,0,0,0.24), 0 8rpx 22rpx rgba(0,0,0,0.18);
+}
+.board-row { justify-content: center; }
+
+/* Native buttons have auto horizontal margins; reset them for equal tiles. */
+.action-grid .act-btn {
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  height: 96rpx;
+  min-height: 96rpx;
+  margin: 0;
+  padding: 0 8rpx;
+  box-sizing: border-box;
+  border-radius: 16rpx;
+}
+.action-grid .act-btn[disabled] {
+  width: 100%;
+  height: 96rpx;
+  min-height: 96rpx;
+  border-radius: 16rpx;
+}

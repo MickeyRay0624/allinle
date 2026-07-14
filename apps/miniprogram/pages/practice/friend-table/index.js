@@ -424,5 +424,6 @@ function assignPosition(index, count) {
   if (index === count - 2) return "b1";
   if (index === count - 1) return "b2";
   if (index === 3) return "l0";
-  return "r0";
+  if (index === 4) return "r0";
+  return "r1";
 }
