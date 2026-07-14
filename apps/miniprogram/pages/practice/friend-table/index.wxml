@@ -16,7 +16,7 @@
   </view>
 
   <!-- 牌桌区 -->
-  <view class="table-area">
+  <view class="table-area {{gameState && gameState.status === 'HAND_FINISHED' ? 'table-finished' : ''}}">
     <view class="table-rail"></view>
     <view class="table-felt"></view>
     <view class="felt-line felt-line-one"></view>
@@ -43,7 +43,7 @@
     </view>
 
     <!-- 玩家座位 -->
-    <view class="seat-layout seat-count-{{playerCount}}">
+    <view wx:if="{{gameState && gameState.status !== 'HAND_FINISHED'}}" class="seat-layout seat-count-{{playerCount}}">
       <view
         wx:for="{{seatPlayers}}"
         wx:key="seatNo"
@@ -69,6 +69,15 @@
         <!-- 动作气泡 -->
         <view wx:if="{{item.lastAction}}" class="action-bubble {{item.lastAction}}">
           {{item.lastAction}}
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{overflowPlayers.length > 0 && gameState && gameState.status !== 'HAND_FINISHED'}}" class="overflow-roster">
+      <text class="overflow-count">另有 {{overflowPlayers.length}} 人</text>
+      <view class="overflow-window">
+        <view class="overflow-track">
+          <text wx:for="{{overflowPlayers}}" wx:key="seatNo" class="overflow-name">#{{item.seatNo}} {{item.nickname}}</text>
         </view>
       </view>
     </view>
@@ -122,6 +131,20 @@
   <!-- 手牌结束 -->
   <view class="hand-finished-area" wx:if="{{gameState && gameState.status === 'HAND_FINISHED'}}">
     <view class="finished-title">本手结束</view>
+    <view class="finished-roster" wx:if="{{allTablePlayers.length}}">
+      <view class="roster-track">
+        <view wx:for="{{allTablePlayers}}" wx:key="seatNo" class="roster-player">
+          <text class="roster-seat">#{{item.seatNo}}</text>
+          <text class="roster-name">{{item.nickname}}</text>
+          <text class="roster-chips">◆ {{item.chips}}</text>
+        </view>
+        <view wx:for="{{allTablePlayers}}" wx:key="seatNo" class="roster-player roster-copy">
+          <text class="roster-seat">#{{item.seatNo}}</text>
+          <text class="roster-name">{{item.nickname}}</text>
+          <text class="roster-chips">◆ {{item.chips}}</text>
+        </view>
+      </view>
+    </view>
     <view wx:if="{{winnerInfo}}" class="winner-section">
       <view wx:for="{{winnerInfo.pots}}" wx:key="index" wx:for-item="pot" class="pot-result">
         <view class="pot-label">底池 {{pot.amount}}</view>

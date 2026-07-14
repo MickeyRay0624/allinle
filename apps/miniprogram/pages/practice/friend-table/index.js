@@ -39,6 +39,8 @@ Page({
     currentTurnNickname: "",
     playerCount: 0,
     seatPlayers: [],
+    allTablePlayers: [],
+    overflowPlayers: [],
     displayBoardCards: [],
     winnerInfo: null,
     legalActionMap: emptyLegalActionMap(),
@@ -244,7 +246,7 @@ Page({
   updateSeatPlayers() {
     var gameState = this.data.gameState;
     if (!gameState || !gameState.players) {
-      this.setData({ seatPlayers: [], playerCount: 0 });
+      this.setData({ seatPlayers: [], allTablePlayers: [], overflowPlayers: [], playerCount: 0 });
       return;
     }
     var players = gameState.players.filter(function(p) {
@@ -254,7 +256,7 @@ Page({
     var privateState = this.data.privateState;
     var mySeatNo = privateState ? privateState.seatNo : -1;
 
-    var seatPlayers = players.map(function(p, idx) {
+    var allTablePlayers = players.map(function(p, idx) {
       return {
         seatNo: p.seatNo,
         nickname: p.nickname || "成员",
@@ -276,12 +278,33 @@ Page({
       };
     });
 
+    // A phone table remains readable with at most nine seats. For larger
+    // rooms always retain the local player, the current actor and dealer,
+    // then fill the remaining slots by seat order.
+    var prioritySeatNumbers = [mySeatNo, gameState.currentTurnSeat, gameState.dealerSeat];
+    var selected = [];
+    prioritySeatNumbers.forEach(function(seatNo) {
+      var player = allTablePlayers.find(function(item) { return item.seatNo === seatNo; });
+      if (player && !selected.some(function(item) { return item.seatNo === player.seatNo; })) selected.push(player);
+    });
+    allTablePlayers.forEach(function(player) {
+      if (selected.length < 9 && !selected.some(function(item) { return item.seatNo === player.seatNo; })) selected.push(player);
+    });
+    selected.sort(function(a, b) { return a.seatNo - b.seatNo; });
+    var seatPlayers = selected.slice(0, 9);
+    var visibleSeats = seatPlayers.map(function(player) { return player.seatNo; });
+    var overflowPlayers = allTablePlayers.filter(function(player) { return visibleSeats.indexOf(player.seatNo) < 0; });
     var count = seatPlayers.length;
     seatPlayers.forEach(function(sp, i) {
       sp.position = assignPosition(i, count);
     });
 
-    this.setData({ seatPlayers: seatPlayers, playerCount: count });
+    this.setData({
+      seatPlayers: seatPlayers,
+      allTablePlayers: allTablePlayers,
+      overflowPlayers: overflowPlayers,
+      playerCount: count
+    });
   },
 
   updateBoardCards(animate) {

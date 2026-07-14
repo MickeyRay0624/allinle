@@ -587,3 +587,97 @@
   min-height: 96rpx;
   border-radius: 16rpx;
 }
+
+/* Keep corner seats inside the rounded table and make labels readable both
+   over felt and over the dark page surrounding the table. */
+.seat-layout { inset: 42rpx 46rpx; }
+.seat-count-7 .position-t0,
+.seat-count-8 .position-t0,
+.seat-count-9 .position-t0,
+.seat-count-7 .position-b0,
+.seat-count-8 .position-b0,
+.seat-count-9 .position-b0 { left: 4%; }
+.seat-count-7 .position-t2,
+.seat-count-8 .position-t2,
+.seat-count-9 .position-t2,
+.seat-count-7 .position-b2,
+.seat-count-8 .position-b2,
+.seat-count-9 .position-b2 { right: 4%; }
+.seat-info { width: 100%; }
+.seat-name {
+  width: 100%;
+  max-width: 168rpx;
+  color: #ffffff !important;
+  font-weight: 700;
+  text-align: center;
+  text-shadow: 0 2rpx 5rpx #000, 0 0 8rpx rgba(0,0,0,0.9);
+}
+.seat-invested { color: #ffe08a !important; text-shadow: 0 2rpx 4rpx #000; }
+.seat.folded .seat-name { color: #d6dcd8 !important; }
+
+/* More than nine players: keep the important nine on the felt and cycle the
+   remaining names in a compact, non-blocking strip. */
+.overflow-roster {
+  position: absolute;
+  left: 50%;
+  bottom: 10rpx;
+  transform: translateX(-50%);
+  z-index: 18;
+  display: flex;
+  align-items: center;
+  width: 72%;
+  height: 36rpx;
+  padding: 0 12rpx;
+  overflow: hidden;
+  box-sizing: border-box;
+  border: 1rpx solid rgba(244,208,111,0.25);
+  border-radius: 18rpx;
+  background: rgba(3, 15, 10, 0.84);
+}
+.overflow-count { flex-shrink: 0; margin-right: 14rpx; color: #f1cf78; font-size: 18rpx; }
+.overflow-window { flex: 1; overflow: hidden; }
+.overflow-track { display: flex; width: max-content; gap: 20rpx; animation: overflowSlide 10s linear infinite; }
+.overflow-name { color: #fff; font-size: 18rpx; white-space: nowrap; }
+
+/* Once a hand ends, remove all floating seats from the compressed table and
+   present everyone in a continuously moving result roster. */
+.table-area.table-finished { min-height: 250rpx; }
+.finished-roster {
+  width: 100%;
+  margin: 0 0 16rpx;
+  overflow: hidden;
+  border-top: 1rpx solid rgba(244,208,111,0.18);
+  border-bottom: 1rpx solid rgba(244,208,111,0.18);
+  background: rgba(255,255,255,0.025);
+}
+.roster-track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  padding: 10rpx 0;
+  animation: rosterLoop 22s linear infinite;
+}
+.roster-player {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  min-width: 210rpx;
+  margin-right: 12rpx;
+  padding: 8rpx 14rpx;
+  box-sizing: border-box;
+  border: 1rpx solid rgba(255,255,255,0.1);
+  border-radius: 14rpx;
+  background: #141b17;
+}
+.roster-seat { color: #8c9991; font-size: 18rpx; margin-right: 8rpx; }
+.roster-name { max-width: 104rpx; overflow: hidden; color: #fff; font-size: 21rpx; font-weight: 650; white-space: nowrap; text-overflow: ellipsis; }
+.roster-chips { margin-left: auto; color: #f0c965; font-size: 19rpx; }
+
+@keyframes rosterLoop {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes overflowSlide {
+  0%, 12% { transform: translateX(0); }
+  88%, 100% { transform: translateX(-55%); }
+}
