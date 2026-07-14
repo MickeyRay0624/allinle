@@ -5,7 +5,6 @@
     "poker-card": "/components/poker-card/index"
   },
   "navigationBarTitleText": "好友牌桌",
-  "disableScroll": true,
   "enableShareAppMessage": true,
   "enableShareTimeline": true
 }

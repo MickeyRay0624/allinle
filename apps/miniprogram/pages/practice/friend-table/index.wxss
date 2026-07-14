@@ -681,3 +681,48 @@
   0%, 12% { transform: translateX(0); }
   88%, 100% { transform: translateX(-55%); }
 }
+
+/* High-contrast perimeter: the page outside the felt is green-black instead
+   of pure black, while each player label is a self-contained opaque badge. */
+.table-page {
+  background:
+    radial-gradient(ellipse at 50% 38%, rgba(18, 89, 61, 0.42), transparent 55%),
+    linear-gradient(180deg, #07150f 0%, #0b1d15 48%, #050b08 100%);
+}
+.table-area { overflow: visible; }
+.seat-layout { inset: 48rpx 62rpx; }
+.seat-count-7, .seat-count-8, .seat-count-9 { inset: 48rpx 72rpx; }
+.seat {
+  overflow: hidden;
+  background: linear-gradient(180deg, #10271c 0%, #06110c 100%) !important;
+  border: 2rpx solid rgba(244, 208, 111, 0.42) !important;
+  box-shadow: 0 7rpx 18rpx rgba(0,0,0,0.72), inset 0 1rpx 0 rgba(255,255,255,0.08) !important;
+}
+.seat text { color: #ffffff !important; }
+.seat .seat-chips { color: #f5d16f !important; }
+.seat .seat-invested { color: #ffdf8d !important; }
+.seat .dealer { color: #151008 !important; }
+.seat.folded { opacity: 0.72; }
+.seat.out { opacity: 0.58; }
+
+/* Normal play remains a fixed game surface. The result state becomes a
+   regular document so every result and action button can be reached by scroll. */
+.table-page.hand-ended {
+  height: auto;
+  min-height: 100vh;
+  overflow: visible;
+  display: block;
+  padding-bottom: calc(env(safe-area-inset-bottom) + 28rpx);
+}
+.table-page.hand-ended .table-header { position: sticky; top: 0; }
+.table-page.hand-ended .table-area.table-finished {
+  height: 300rpx;
+  min-height: 300rpx;
+  margin-bottom: 16rpx;
+}
+.table-page.hand-ended .my-area { min-height: 156rpx; }
+.table-page.hand-ended .hand-finished-area {
+  overflow: visible;
+  padding-bottom: calc(env(safe-area-inset-bottom) + 40rpx);
+}
+.table-page.hand-ended .finished-actions { padding-bottom: 20rpx; }

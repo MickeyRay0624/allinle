@@ -1,4 +1,4 @@
-<view class="table-page">
+<view class="table-page {{gameState && gameState.status === 'HAND_FINISHED' ? 'hand-ended' : ''}}">
   <!-- 顶部信息栏 -->
   <view class="table-header">
     <view class="header-left">
