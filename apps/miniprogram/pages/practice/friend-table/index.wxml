@@ -17,6 +17,11 @@
 
   <!-- 牌桌区 -->
   <view class="table-area">
+    <view class="table-rail"></view>
+    <view class="table-felt"></view>
+    <view class="felt-line felt-line-one"></view>
+    <view class="felt-line felt-line-two"></view>
+    <view class="table-brand">ALLINLE</view>
     <!-- 公共牌 -->
     <view class="board-cards">
       <view class="board-label" wx:if="{{gameState && gameState.boardCards && gameState.boardCards.length > 0}}">公共牌</view>
@@ -111,16 +116,20 @@
 
   <!-- 操作按钮 -->
   <view class="action-area" wx:if="{{isMyTurn && gameState && gameState.status === 'PLAYING'}}">
+    <view class="action-title">
+      <text>轮到你行动</text>
+      <text class="action-hint">请选择操作</text>
+    </view>
     <view class="action-input" wx:if="{{legalActionMap.BET.enabled || legalActionMap.RAISE.enabled}}">
       <t-input value="{{actionAmount}}" type="number" placeholder="下注/加注数量" bindchange="onAmountChange" />
     </view>
     <view class="action-grid">
-      <button class="act-btn" data-action="FOLD" bindtap="sendAction" disabled="{{!legalActionMap.FOLD.enabled}}">Fold</button>
-      <button class="act-btn" data-action="CHECK" bindtap="sendAction" disabled="{{!legalActionMap.CHECK.enabled}}">Check</button>
-      <button class="act-btn" data-action="CALL" bindtap="sendAction" disabled="{{!legalActionMap.CALL.enabled}}">{{legalActionMap.CALL.label || 'Call'}}</button>
-      <button class="act-btn bet" data-action="BET" bindtap="sendAction" disabled="{{!legalActionMap.BET.enabled}}">{{legalActionMap.BET.label || 'Bet'}}</button>
-      <button class="act-btn bet" data-action="RAISE" bindtap="sendAction" disabled="{{!legalActionMap.RAISE.enabled}}">{{legalActionMap.RAISE.label || 'Raise'}}</button>
-      <button class="act-btn allin" data-action="ALL_IN" bindtap="sendAction" disabled="{{!legalActionMap.ALL_IN.enabled}}">All-in</button>
+      <button class="act-btn fold" data-action="FOLD" bindtap="sendAction" disabled="{{!legalActionMap.FOLD.enabled}}"><text class="act-icon">×</text><text>弃牌</text><text class="act-en">FOLD</text></button>
+      <button class="act-btn check" data-action="CHECK" bindtap="sendAction" disabled="{{!legalActionMap.CHECK.enabled}}"><text class="act-icon">✓</text><text>过牌</text><text class="act-en">CHECK</text></button>
+      <button class="act-btn call" data-action="CALL" bindtap="sendAction" disabled="{{!legalActionMap.CALL.enabled}}"><text class="act-icon">●</text><text>{{legalActionMap.CALL.label || '跟注'}}</text><text class="act-en">CALL</text></button>
+      <button class="act-btn bet" data-action="BET" bindtap="sendAction" disabled="{{!legalActionMap.BET.enabled}}"><text class="act-icon">＋</text><text>{{legalActionMap.BET.label || '下注'}}</text><text class="act-en">BET</text></button>
+      <button class="act-btn raise" data-action="RAISE" bindtap="sendAction" disabled="{{!legalActionMap.RAISE.enabled}}"><text class="act-icon">↗</text><text>{{legalActionMap.RAISE.label || '加注'}}</text><text class="act-en">RAISE</text></button>
+      <button class="act-btn allin" data-action="ALL_IN" bindtap="sendAction" disabled="{{!legalActionMap.ALL_IN.enabled}}"><text class="act-icon">◆</text><text>全下</text><text class="act-en">ALL-IN</text></button>
     </view>
   </view>
 
