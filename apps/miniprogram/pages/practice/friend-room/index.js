@@ -16,7 +16,12 @@ Page({
         myChips: "",
         canStart: false,
         starting: false,
-        lastMessage: ""
+        lastMessage: "",
+        displayPlayers: [],
+        confirmedCount: 0,
+        readyCount: 0,
+        readyPercent: 0,
+        maxPlayers: 0
     },
     async onLoad(query) {
         isNavigatingToTable = false;
@@ -99,15 +104,39 @@ Page({
             return;
         const userId = (wx.getStorageSync("user") || {}).id || index_1.store.getState().user?.id || "";
         const myPlayer = room.players?.find((p) => p.userId === userId);
-        const allReady = room.players?.every((p) => p.initialChipsConfirmed && p.readyStatus);
+        const players = Array.isArray(room.players) ? room.players : [];
+        const allReady = players.every((p) => p.initialChipsConfirmed && p.readyStatus);
+        const confirmedCount = players.filter((p) => p.initialChipsConfirmed).length;
+        const readyCount = players.filter((p) => p.readyStatus).length;
+        const displayPlayers = players.map((player) => {
+            const nickname = String(player.nickname || "成员");
+            return {
+                ...player,
+                nickname,
+                initial: nickname.charAt(0).toUpperCase(),
+                isMe: player.userId === userId,
+                isOwner: player.userId === room.ownerUserId
+            };
+        });
         this.setData({
             room,
+            displayPlayers,
             connected: socket_1.practiceRoomSocket.isConnected(),
             isOwner: room.ownerUserId === userId,
             myChips: myPlayer?.chipsSetByPlayer ? String(myPlayer.chips) : this.data.myChips,
             myConfirmChips: myPlayer?.initialChipsConfirmed || false,
             myReady: myPlayer?.readyStatus || false,
-            canStart: allReady && room.players?.length >= 2 && room.ownerUserId === userId
+            canStart: allReady && players.length >= 2 && room.ownerUserId === userId,
+            confirmedCount,
+            readyCount,
+            readyPercent: players.length ? Math.round((readyCount / players.length) * 100) : 0,
+            maxPlayers: Number(room.playerCount || players.length || 0)
+        });
+    },
+    copyRoomCode() {
+        wx.setClipboardData({
+            data: this.data.roomCode,
+            success: () => wx.showToast({ title: "房间码已复制", icon: "success" })
         });
     },
     onChipsInput(event) {

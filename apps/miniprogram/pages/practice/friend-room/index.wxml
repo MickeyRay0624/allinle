@@ -1,82 +1,102 @@
-<view class="page">
-  <view class="title">好友练习房</view>
-  <view class="subtitle">房间码 {{roomCode}} · {{connected ? '实时同步中' : '等待同步'}}</view>
+<view class="club-page">
+  <view class="ambient ambient-one"></view>
+  <view class="ambient ambient-two"></view>
 
-  <!-- 房间信息 -->
-  <view wx:if="{{room}}" class="section card">
-    <view class="card-title">{{room.status === 'WAITING' ? '等待中' : room.status === 'READY' ? '已就绪' : '练习中'}}</view>
-    <view class="card-desc">盲注 {{room.smallBlind}} / {{room.bigBlind}} · 每人自行填写带入筹码 · 最大 {{room.maxPlayers}} 人</view>
+  <view class="club-header">
+    <view class="eyebrow">ALLINLE PRIVATE CLUB</view>
+    <view class="page-title">好友练习房</view>
+    <view class="connection-pill {{connected ? 'is-online' : ''}}">
+      <view class="connection-dot"></view>
+      <text>{{connected ? '实时同步中' : '正在连接'}}</text>
+    </view>
   </view>
 
-  <!-- 成员列表 -->
-  <view wx:if="{{room}}" class="section">
-    <view class="card-title">成员 ({{room.players ? room.players.length : 0}}/{{room.maxPlayers}})</view>
-    <view wx:for="{{room.players}}" wx:key="id" class="card member-card">
-      <view class="member-row">
-        <view class="member-left">
-          <view class="member-seat">座位 #{{item.seatNo}}</view>
-          <view class="member-name">
-            {{item.nickname || '成员'}}
-            <text wx:if="{{item.userId === room.ownerUserId}}" class="owner-badge">房主</text>
-          </view>
+  <view class="room-pass">
+    <view class="pass-shine"></view>
+    <view class="pass-topline">
+      <text class="pass-label">PRIVATE TABLE</text>
+      <text class="pass-status">{{room && room.status === 'READY' ? 'READY' : room && room.status === 'PLAYING' ? 'PLAYING' : 'WAITING'}}</text>
+    </view>
+    <view class="room-code" bindtap="copyRoomCode">{{roomCode}}</view>
+    <view class="copy-hint" bindtap="copyRoomCode">轻触复制房间码</view>
+    <view wx:if="{{room}}" class="pass-meta">
+      <view class="meta-item"><text class="meta-label">盲注</text><text class="meta-value">{{room.smallBlind}} / {{room.bigBlind}}</text></view>
+      <view class="meta-divider"></view>
+      <view class="meta-item"><text class="meta-label">席位</text><text class="meta-value">{{displayPlayers.length}} / {{maxPlayers}}</text></view>
+      <view class="meta-divider"></view>
+      <view class="meta-item"><text class="meta-label">模式</text><text class="meta-value">好友局</text></view>
+    </view>
+  </view>
+
+  <view wx:if="{{room}}" class="progress-card">
+    <view class="section-heading">
+      <view><view class="section-kicker">TABLE STATUS</view><view class="section-title">入席进度</view></view>
+      <view class="progress-number">{{readyCount}}<text>/{{displayPlayers.length}}</text></view>
+    </view>
+    <view class="progress-track"><view class="progress-fill" style="width: {{readyPercent}}%"></view></view>
+    <view class="progress-legend">
+      <text>已确认筹码 {{confirmedCount}} 人</text>
+      <text>已准备 {{readyCount}} 人</text>
+    </view>
+  </view>
+
+  <view wx:if="{{room}}" class="players-section">
+    <view class="section-heading">
+      <view><view class="section-kicker">MEMBERS</view><view class="section-title">本桌成员</view></view>
+      <view class="member-total">{{displayPlayers.length}} 位</view>
+    </view>
+    <view class="player-grid">
+      <view wx:for="{{displayPlayers}}" wx:key="id" class="player-tile {{item.readyStatus ? 'is-ready' : ''}} {{item.isMe ? 'is-me' : ''}}">
+        <view class="avatar-ring">
+          <view class="avatar-core">{{item.initial}}</view>
+          <view wx:if="{{item.readyStatus}}" class="ready-orbit"></view>
         </view>
-        <view class="member-right">
-          <view class="member-chips">{{item.chipsSetByPlayer ? '带入筹码 ' + item.chips : '尚未填写筹码'}}</view>
-          <view class="member-status">
-            <text class="status-item {{item.initialChipsConfirmed ? 'done' : 'pending'}}">
-              {{item.initialChipsConfirmed ? '✓ 已确认' : '○ 待确认'}}
-            </text>
-            <text class="status-item {{item.readyStatus ? 'done' : 'pending'}}">
-              {{item.readyStatus ? '✓ 已准备' : '○ 未准备'}}
-            </text>
+        <view class="player-main">
+          <view class="player-name-row">
+            <text class="player-name">{{item.nickname}}</text>
+            <text wx:if="{{item.isOwner}}" class="owner-chip">房主</text>
+            <text wx:if="{{item.isMe}}" class="me-chip">我</text>
           </view>
+          <view class="seat-caption">SEAT {{item.seatNo}}</view>
+          <view class="chip-line">◆ {{item.chipsSetByPlayer ? item.chips : '待填写'}}</view>
+        </view>
+        <view class="state-column">
+          <view class="state-dot {{item.initialChipsConfirmed ? 'done' : ''}}"></view>
+          <text class="state-text">{{item.initialChipsConfirmed ? '已核对' : '待核对'}}</text>
+          <text class="ready-text {{item.readyStatus ? 'done' : ''}}">{{item.readyStatus ? 'READY' : 'WAIT'}}</text>
         </view>
       </view>
     </view>
     <view class="notice" wx:if="{{lastMessage}}">{{lastMessage}}</view>
   </view>
 
-  <view wx:if="{{room && room.status !== 'PLAYING'}}" class="section card">
-    <view class="card-title">我的带入筹码</view>
-    <t-input value="{{myChips}}" type="number" placeholder="请输入正整数" bindchange="onChipsInput" />
-    <t-button theme="primary" block bindtap="saveChips">提交/修改筹码</t-button>
-    <view class="card-desc">任何人修改筹码后，所有成员都需要重新核对确认。</view>
+  <view wx:if="{{room && room.status !== 'PLAYING'}}" class="buyin-card">
+    <view class="section-kicker">YOUR BUY-IN</view>
+    <view class="section-title">我的带入筹码</view>
+    <view class="buyin-input-wrap">
+      <text class="chip-symbol">◆</text>
+      <input class="buyin-input" value="{{myChips}}" type="number" placeholder="输入正整数" placeholder-class="input-placeholder" bindinput="onChipsInput" />
+      <button class="save-chip-button" bindtap="saveChips">提交</button>
+    </view>
+    <view class="buyin-note">修改筹码后，全桌成员需要重新核对确认</view>
   </view>
 
-  <!-- 非房主等待阶段 -->
-  <view wx:if="{{room && room.status !== 'PLAYING' && !isOwner}}" class="section">
-    <view class="button-stack">
-      <t-button theme="warning" block bindtap="confirmChips" disabled="{{myConfirmChips}}">核对无误并确认准备</t-button>
-    </view>
-    <view wx:if="{{myConfirmChips && myReady}}" class="hint-box">
-      <text class="hint-text">✅ 已就绪，等待房主开始练习</text>
-    </view>
-  </view>
-
-  <!-- 房主操作 -->
-  <view wx:if="{{room && room.status !== 'PLAYING' && isOwner}}" class="section">
-    <view class="button-stack">
-      <t-button theme="warning" block bindtap="confirmChips" disabled="{{myConfirmChips}}">核对无误并确认准备</t-button>
-      <t-button theme="warning" block bindtap="startRoom" disabled="{{starting || !canStart}}">
-        {{starting ? '正在开始...' : '开始练习'}}
-      </t-button>
-    </view>
-    <view class="hint-box" wx:if="{{canStart && !starting}}">
-      <text class="hint-text">✅ 所有成员已就绪，点击「开始练习」进入牌桌</text>
-    </view>
-    <view class="hint-box muted-box" wx:elif="{{!canStart}}">
-      <text class="hint-text muted-text">⏳ 等待所有成员确认筹码并准备</text>
+  <view wx:if="{{room && room.status !== 'PLAYING'}}" class="action-dock">
+    <button class="club-button secondary {{myConfirmChips ? 'is-disabled' : ''}}" bindtap="confirmChips" disabled="{{myConfirmChips}}">
+      <text class="button-icon">✓</text><text>{{myConfirmChips ? '筹码已确认' : '核对筹码并准备'}}</text>
+    </button>
+    <button wx:if="{{isOwner}}" class="club-button primary {{starting || !canStart ? 'is-disabled' : ''}}" bindtap="startRoom" disabled="{{starting || !canStart}}">
+      <text class="button-icon">♠</text><text>{{starting ? '正在开桌...' : '开始练习'}}</text>
+    </button>
+    <view class="dock-message {{canStart ? 'success' : ''}}">
+      {{isOwner ? (canStart ? '全员就绪，可以开始本桌练习' : '等待所有成员确认筹码并准备') : (myConfirmChips && myReady ? '你已就绪，等待房主开桌' : '请确认筹码并完成准备')}}
     </view>
   </view>
 
-  <!-- 已在牌局中（重连场景） -->
-  <view wx:if="{{room && room.status === 'PLAYING'}}" class="section card">
-    <view class="card-title">练习已在进行中</view>
-    <view class="card-desc">正在跳转到牌桌...</view>
+  <view wx:if="{{room && room.status === 'PLAYING'}}" class="reconnecting-card">
+    <view class="spinner"></view><view><view class="section-title">牌局已开始</view><view class="buyin-note">正在进入私人牌桌</view></view>
   </view>
 
-  <!-- 退出 -->
-  <view class="section">
-    <t-button variant="outline" block bindtap="leaveRoom">退出房间</t-button>
-  </view>
+  <button class="leave-button" bindtap="leaveRoom">退出房间</button>
+  <view class="safe-space"></view>
 </view>

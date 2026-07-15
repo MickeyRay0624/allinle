@@ -1,79 +1,91 @@
-.member-card {
-  padding: 22rpx 28rpx;
+page { background: #06100c; }
+.club-page {
+  position: relative;
+  min-height: 100vh;
+  padding: 42rpx 28rpx 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  color: #f7f3e8;
+  background:
+    radial-gradient(circle at 82% 6%, rgba(57, 128, 91, .22), transparent 30%),
+    radial-gradient(circle at 8% 38%, rgba(151, 112, 48, .10), transparent 28%),
+    linear-gradient(165deg, #07130e 0%, #0b1d15 46%, #050b08 100%);
 }
-.member-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.member-left {
-  display: flex;
-  flex-direction: column;
-  gap: 6rpx;
-}
-.member-seat {
-  font-size: 20rpx;
-  color: #f4d06f;
-}
-.member-name {
-  font-size: 28rpx;
-  font-weight: 600;
-  color: #ffffff;
-}
-.owner-badge {
-  display: inline-block;
-  margin-left: 8rpx;
-  padding: 2rpx 10rpx;
-  font-size: 20rpx;
-  color: #0c0c0c;
-  background: #f4d06f;
-  border-radius: 6rpx;
-}
-.member-right {
-  text-align: right;
-}
-.member-chips {
-  font-size: 26rpx;
-  color: #f4d06f;
-  font-weight: 600;
-}
-.member-status {
-  display: flex;
-  flex-direction: column;
-  gap: 2rpx;
-  margin-top: 6rpx;
-}
-.status-item {
-  font-size: 22rpx;
-}
-.status-item.done {
-  color: #5cb85c;
-}
-.status-item.pending {
-  color: #8c8c8c;
-}
-.hint {
-  margin-top: 16rpx;
-  text-align: center;
-}
-.hint-box {
-  margin-top: 20rpx;
-  padding: 16rpx 20rpx;
-  background: rgba(244, 208, 111, 0.08);
-  border: 1rpx solid rgba(244, 208, 111, 0.2);
-  border-radius: 10rpx;
-  text-align: center;
-}
-.muted-box {
-  background: rgba(255, 255, 255, 0.03);
-  border-color: rgba(255, 255, 255, 0.08);
-}
-.hint-text {
-  font-size: 26rpx;
-  color: #f4d06f;
-  font-weight: 600;
-}
-.muted-text {
-  color: #888;
-  font-weight: 400;
-}
+.ambient { position: absolute; border-radius: 50%; filter: blur(18rpx); pointer-events: none; }
+.ambient-one { width: 320rpx; height: 320rpx; right: -180rpx; top: 120rpx; background: rgba(41, 128, 84, .13); }
+.ambient-two { width: 260rpx; height: 260rpx; left: -170rpx; top: 760rpx; background: rgba(196, 145, 56, .08); }
+.club-header { position: relative; z-index: 1; }
+.eyebrow, .section-kicker { color: #b99049; font-size: 18rpx; font-weight: 700; letter-spacing: 5rpx; }
+.page-title { margin-top: 8rpx; color: #fffaf0; font-size: 46rpx; font-weight: 750; letter-spacing: 2rpx; }
+.connection-pill { position: absolute; top: 8rpx; right: 0; display: flex; align-items: center; gap: 8rpx; padding: 8rpx 14rpx; color: #7e8b84; font-size: 20rpx; border: 1rpx solid rgba(255,255,255,.08); border-radius: 22rpx; background: rgba(0,0,0,.16); }
+.connection-dot { width: 10rpx; height: 10rpx; border-radius: 50%; background: #59615d; }
+.connection-pill.is-online { color: #79c99d; }
+.connection-pill.is-online .connection-dot { background: #48c886; box-shadow: 0 0 14rpx rgba(72,200,134,.8); }
+
+.room-pass { position: relative; z-index: 1; margin-top: 30rpx; padding: 26rpx 28rpx 24rpx; overflow: hidden; border: 1rpx solid rgba(224,186,105,.44); border-radius: 26rpx; background: linear-gradient(145deg, rgba(47,37,24,.96), rgba(15,23,18,.98) 48%, rgba(8,30,21,.98)); box-shadow: 0 20rpx 55rpx rgba(0,0,0,.42), inset 0 1rpx rgba(255,255,255,.12); }
+.pass-shine { position: absolute; width: 360rpx; height: 80rpx; top: -55rpx; right: -70rpx; transform: rotate(-15deg); background: rgba(255,231,167,.12); filter: blur(12rpx); }
+.pass-topline { display: flex; justify-content: space-between; color: #c9aa6a; font-size: 18rpx; letter-spacing: 3rpx; }
+.pass-status { color: #6ed09b; }
+.room-code { margin-top: 18rpx; color: #fff8e8; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 58rpx; font-weight: 800; letter-spacing: 15rpx; text-align: center; text-shadow: 0 4rpx 24rpx rgba(232,189,100,.22); }
+.copy-hint { margin-top: 4rpx; color: #837b6d; font-size: 20rpx; text-align: center; }
+.pass-meta { display: flex; justify-content: space-around; align-items: center; margin-top: 24rpx; padding-top: 20rpx; border-top: 1rpx solid rgba(255,255,255,.08); }
+.meta-item { display: flex; flex-direction: column; align-items: center; gap: 5rpx; }
+.meta-label { color: #7f8b84; font-size: 19rpx; }
+.meta-value { color: #eee7d8; font-size: 23rpx; font-weight: 650; }
+.meta-divider { width: 1rpx; height: 34rpx; background: rgba(255,255,255,.1); }
+
+.progress-card, .buyin-card, .reconnecting-card { position: relative; z-index: 1; margin-top: 24rpx; padding: 26rpx; border: 1rpx solid rgba(255,255,255,.08); border-radius: 22rpx; background: linear-gradient(160deg, rgba(19,39,29,.92), rgba(8,18,13,.95)); box-shadow: 0 15rpx 35rpx rgba(0,0,0,.24); }
+.section-heading { display: flex; justify-content: space-between; align-items: flex-end; }
+.section-title { margin-top: 5rpx; color: #f8f2e4; font-size: 30rpx; font-weight: 700; }
+.progress-number { color: #d9b463; font-size: 38rpx; font-weight: 800; }
+.progress-number text { color: #69756e; font-size: 22rpx; }
+.progress-track { height: 10rpx; margin-top: 22rpx; overflow: hidden; border-radius: 8rpx; background: #1a2821; }
+.progress-fill { height: 100%; border-radius: 8rpx; background: linear-gradient(90deg, #b7893c, #ead184 55%, #58bd83); box-shadow: 0 0 14rpx rgba(224,186,105,.32); transition: width .35s ease; }
+.progress-legend { display: flex; justify-content: space-between; margin-top: 12rpx; color: #849088; font-size: 20rpx; }
+
+.players-section { position: relative; z-index: 1; margin-top: 30rpx; }
+.member-total { color: #8a958e; font-size: 22rpx; }
+.player-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14rpx; margin-top: 16rpx; }
+.player-tile { display: flex; align-items: center; min-width: 0; padding: 18rpx 14rpx; border: 1rpx solid rgba(255,255,255,.08); border-radius: 20rpx; background: linear-gradient(145deg, rgba(20,35,27,.96), rgba(7,15,11,.98)); box-shadow: 0 9rpx 24rpx rgba(0,0,0,.24); }
+.player-tile.is-ready { border-color: rgba(91,198,135,.34); }
+.player-tile.is-me { box-shadow: inset 0 0 0 1rpx rgba(222,183,98,.55), 0 9rpx 24rpx rgba(0,0,0,.28); }
+.avatar-ring { position: relative; flex: 0 0 68rpx; width: 68rpx; height: 68rpx; display: flex; align-items: center; justify-content: center; border: 2rpx solid #846735; border-radius: 50%; background: #09110d; }
+.avatar-core { display: flex; align-items: center; justify-content: center; width: 54rpx; height: 54rpx; color: #f4d887; font-size: 25rpx; font-weight: 750; border-radius: 50%; background: linear-gradient(145deg, #244d37, #10271b); }
+.ready-orbit { position: absolute; inset: -5rpx; border: 3rpx solid #55c686; border-left-color: transparent; border-radius: 50%; animation: orbit 4s linear infinite; }
+.player-main { min-width: 0; flex: 1; margin-left: 12rpx; }
+.player-name-row { display: flex; align-items: center; min-width: 0; gap: 5rpx; }
+.player-name { max-width: 125rpx; overflow: hidden; color: #fff; font-size: 23rpx; font-weight: 680; white-space: nowrap; text-overflow: ellipsis; }
+.owner-chip, .me-chip { flex-shrink: 0; padding: 2rpx 6rpx; font-size: 15rpx; border-radius: 5rpx; }
+.owner-chip { color: #201608; background: #d9b15b; }
+.me-chip { color: #75d39e; border: 1rpx solid rgba(117,211,158,.5); }
+.seat-caption { margin-top: 3rpx; color: #657169; font-size: 16rpx; letter-spacing: 2rpx; }
+.chip-line { margin-top: 5rpx; color: #dcb85f; font-size: 20rpx; font-weight: 650; }
+.state-column { flex: 0 0 46rpx; display: flex; flex-direction: column; align-items: center; }
+.state-dot { width: 10rpx; height: 10rpx; border-radius: 50%; background: #4c5550; }
+.state-dot.done { background: #55c686; box-shadow: 0 0 10rpx rgba(85,198,134,.7); }
+.state-text { margin-top: 5rpx; color: #717d76; font-size: 15rpx; }
+.ready-text { margin-top: 4rpx; color: #626c66; font-size: 14rpx; font-weight: 750; letter-spacing: 1rpx; }
+.ready-text.done { color: #62c990; }
+
+.buyin-input-wrap { display: flex; align-items: center; height: 88rpx; margin-top: 18rpx; padding-left: 20rpx; overflow: hidden; border: 1rpx solid rgba(218,179,96,.34); border-radius: 16rpx; background: #07100b; }
+.chip-symbol { color: #d8b157; font-size: 24rpx; }
+.buyin-input { min-width: 0; flex: 1; height: 88rpx; padding: 0 14rpx; color: #fff8e9; font-size: 30rpx; font-weight: 700; }
+.input-placeholder { color: #465149; font-size: 25rpx; font-weight: 400; }
+.save-chip-button { width: 130rpx; height: 88rpx; margin: 0; padding: 0; color: #1b1308; font-size: 24rpx; font-weight: 750; border: 0; border-radius: 0; background: linear-gradient(145deg, #f0d181, #af7d2e); }
+.save-chip-button::after, .club-button::after, .leave-button::after { border: 0; }
+.buyin-note { margin-top: 12rpx; color: #758078; font-size: 20rpx; line-height: 1.5; }
+
+.action-dock { position: relative; z-index: 1; margin-top: 24rpx; padding: 20rpx; border: 1rpx solid rgba(218,179,96,.16); border-radius: 24rpx; background: rgba(5,13,9,.84); box-shadow: 0 20rpx 45rpx rgba(0,0,0,.32); }
+.club-button { display: flex; align-items: center; justify-content: center; width: 100%; height: 88rpx; margin: 0 0 14rpx; color: #eee7d7; font-size: 26rpx; font-weight: 700; border-radius: 16rpx; }
+.club-button.secondary { border: 1rpx solid rgba(213,178,101,.38); background: linear-gradient(145deg, #23382c, #102018); }
+.club-button.primary { color: #1c1408; border: 1rpx solid #f1d48b; background: linear-gradient(145deg, #f1d486, #b27f31); box-shadow: 0 10rpx 24rpx rgba(183,132,48,.22); }
+.club-button.is-disabled { color: #5f6963; border-color: #26322b; background: #17201b; box-shadow: none; }
+.button-icon { margin-right: 12rpx; }
+.dock-message { color: #758078; font-size: 20rpx; text-align: center; }
+.dock-message.success { color: #66cb91; }
+.reconnecting-card { display: flex; align-items: center; gap: 18rpx; }
+.spinner { width: 38rpx; height: 38rpx; border: 4rpx solid #26372d; border-top-color: #d8b15c; border-radius: 50%; animation: orbit 1s linear infinite; }
+.leave-button { position: relative; z-index: 1; width: 100%; height: 80rpx; margin: 24rpx 0 0; color: #89938d; font-size: 23rpx; border: 1rpx solid rgba(255,255,255,.1); border-radius: 16rpx; background: rgba(8,15,11,.65); }
+.safe-space { height: calc(env(safe-area-inset-bottom) + 34rpx); }
+.notice { margin-top: 16rpx; color: #d7b35f; font-size: 22rpx; text-align: center; }
+@keyframes orbit { to { transform: rotate(360deg); } }
