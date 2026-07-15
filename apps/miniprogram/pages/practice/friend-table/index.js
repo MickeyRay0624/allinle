@@ -257,9 +257,11 @@ Page({
     var mySeatNo = privateState ? privateState.seatNo : -1;
 
     var allTablePlayers = players.map(function(p, idx) {
+      var nickname = p.nickname || "成员";
       return {
         seatNo: p.seatNo,
-        nickname: p.nickname || "成员",
+        nickname: nickname,
+        initial: String(nickname).charAt(0).toUpperCase(),
         chips: p.chips,
         status: p.status,
         invested: p.investedThisStreet || 0,

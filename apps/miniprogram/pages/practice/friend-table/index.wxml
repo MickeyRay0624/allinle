@@ -2,6 +2,7 @@
   <!-- 顶部信息栏 -->
   <view class="table-header">
     <view class="header-left">
+      <text class="header-club">ALLINLE CLUB</text>
       <text class="header-room">#{{roomCode}}</text>
       <text class="header-hand" wx:if="{{gameState}}">第 {{gameState.handNo}} 手</text>
     </view>
@@ -10,6 +11,7 @@
       <text class="header-pot" wx:if="{{gameState}}">底池 {{gameState.pot}}</text>
     </view>
     <view class="header-right">
+      <text class="header-table-label">PRIVATE TABLE</text>
       <text class="header-blinds" wx:if="{{room}}">{{room.smallBlind}}/{{room.bigBlind}}</text>
       <text class="header-status {{connected ? 'online' : 'offline'}}">{{connected ? '●' : '○'}}</text>
     </view>
@@ -39,6 +41,7 @@
 
     <!-- 底池显示 -->
     <view class="pot-display" wx:if="{{gameState && gameState.pot > 0}}">
+      <view class="pot-chip-icon"><view></view></view>
       <text class="pot-amount">{{gameState.pot}}</text>
     </view>
 
@@ -51,10 +54,13 @@
       >
         <!-- 玩家信息 -->
         <view class="seat-info">
-          <text class="seat-name">{{item.nickname || '成员'}}</text>
-          <text class="seat-chips">{{item.chips}}</text>
-          <text wx:if="{{item.invested > 0}}" class="seat-invested">本轮已下 {{item.invested}}</text>
+          <view class="seat-avatar {{item.isCurrent ? 'mine' : ''}}">{{item.initial}}</view>
+          <view class="seat-copy">
+            <text class="seat-name">{{item.nickname || '成员'}}</text>
+            <text class="seat-chips">{{item.chips}}</text>
+          </view>
         </view>
+        <text wx:if="{{item.invested > 0}}" class="seat-invested">本轮 {{item.invested}}</text>
 
         <!-- 状态标签 -->
         <view class="seat-badges">
@@ -86,7 +92,7 @@
   <!-- 我的手牌和状态 -->
   <view class="my-area" wx:if="{{privateState}}">
     <view class="my-cards">
-      <text class="my-label">我的手牌</text>
+      <text class="my-label">MY HAND · 我的手牌</text>
       <view class="my-cards-row">
         <poker-card
           wx:for="{{privateState.holeCards}}"
@@ -98,7 +104,7 @@
       </view>
     </view>
     <view class="my-chips">
-      <text>剩余筹码</text>
+      <text>STACK · 剩余筹码</text>
       <text class="chips-value">{{privateState.chips}}</text>
     </view>
     <view class="my-turn-label" wx:if="{{isMyTurn}}">
