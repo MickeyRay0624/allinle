@@ -10,6 +10,7 @@ interface RequestOptions {
   data?: Record<string, unknown>;
   header?: Record<string, string>;
   needAuth?: boolean;
+  authRetry?: boolean;
 }
 
 export function getToken(): string | null {
@@ -46,18 +47,30 @@ export async function request<T = any>(options: RequestOptions): Promise<T> {
       method: (options.method || "GET") as any,
       data: options.data,
       header: headers,
-      success: (res: any) => {
+      success: async (res: any) => {
         const body = res.data;
 
         // Token expired or unauthorized
         if (res.statusCode === 401 && body?.code === "AUTH_UNAUTHORIZED") {
           clearToken();
-          // Trigger re-login
-          const app = getApp();
-          if ((app as any).reLogin) {
-            (app as any).reLogin();
+
+          if (options.needAuth !== false && options.authRetry !== false) {
+            const app = getApp();
+            const loginResult = (app as any).reLogin
+              ? await (app as any).reLogin()
+              : null;
+
+            if (loginResult?.token || getToken()) {
+              try {
+                resolve(await request<T>({ ...options, authRetry: false }));
+              } catch (error) {
+                reject(error);
+              }
+              return;
+            }
           }
-          reject(new Error("登录已过期"));
+
+          reject(new Error("登录已过期，请重新登录"));
           return;
         }
 

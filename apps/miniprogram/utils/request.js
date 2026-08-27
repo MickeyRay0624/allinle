@@ -44,17 +44,27 @@ async function request(options) {
             method: (options.method || "GET"),
             data: options.data,
             header: headers,
-            success: (res) => {
+            success: async (res) => {
                 const body = res.data;
                 // Token expired or unauthorized
                 if (res.statusCode === 401 && body?.code === "AUTH_UNAUTHORIZED") {
                     clearToken();
-                    // Trigger re-login
-                    const app = getApp();
-                    if (app.reLogin) {
-                        app.reLogin();
+                    if (options.needAuth !== false && options.authRetry !== false) {
+                        const app = getApp();
+                        const loginResult = app.reLogin
+                            ? await app.reLogin()
+                            : null;
+                        if (loginResult?.token || getToken()) {
+                            try {
+                                resolve(await request({ ...options, authRetry: false }));
+                            }
+                            catch (error) {
+                                reject(error);
+                            }
+                            return;
+                        }
                     }
-                    reject(new Error("登录已过期"));
+                    reject(new Error("登录已过期，请重新登录"));
                     return;
                 }
                 if (res.statusCode >= 200 && res.statusCode < 300) {

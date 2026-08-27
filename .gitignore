@@ -14,3 +14,4 @@ apps/miniprogram/node_modules
 apps/miniprogram/project.private.config.json
 *.tsbuildinfo
 *.log
+apps/miniprogram/sourcemap*.zip

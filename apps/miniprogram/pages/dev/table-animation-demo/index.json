@@ -3,7 +3,5 @@
     "t-button": "tdesign-miniprogram/button/button",
     "poker-card": "/components/poker-card/index"
   },
-  "navigationBarTitleText": "动画演示",
-  "enableShareAppMessage": true,
-  "enableShareTimeline": true
+  "navigationBarTitleText": "动画演示"
 }

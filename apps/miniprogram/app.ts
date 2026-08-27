@@ -1,6 +1,7 @@
 import { wechatLogin, devLogin, getToken, setToken, isDevVersion, api } from "./utils/request";
 
 let checkingProfile = false;
+let loginPromise: Promise<any> | null = null;
 
 App({
   globalData: {
@@ -19,21 +20,27 @@ App({
 
   onShow() {
     wx.showShareMenu({ menus: ["shareAppMessage", "shareTimeline"] });
-    if (getToken()) this.refreshProfile();
+    if (getToken()) {
+      this.refreshProfile();
+    } else {
+      this.doLogin();
+    }
   },
 
   async doLogin() {
-    try {
-      await wechatLogin();
-      await this.refreshProfile();
-    } catch (error) {
-      if (!isDevVersion()) {
-        console.error("微信登录失败", error);
-        return;
-      }
-      console.warn("微信登录失败，尝试本地开发登录...");
+    if (loginPromise) return loginPromise;
+
+    loginPromise = (async () => {
       try {
-        const result = await devLogin("测试用户");
+        let result: any;
+        try {
+          result = await wechatLogin();
+        } catch (error) {
+          if (!isDevVersion()) throw error;
+          console.warn("微信登录失败，尝试本地开发登录...");
+          result = await devLogin("测试用户");
+        }
+
         if (result?.token) {
           setToken(result.token);
           this.globalData.token = result.token;
@@ -42,14 +49,20 @@ App({
             this.globalData.user = result.user;
           }
         }
-      } catch {
-        console.error("登录失败，请检查网络或 API 地址");
+        return result;
+      } catch (error) {
+        console.error("微信登录失败，请检查网络或 API 配置", error);
+        return null;
+      } finally {
+        loginPromise = null;
       }
-    }
+    })();
+
+    return loginPromise;
   },
 
   reLogin() {
-    this.doLogin();
+    return this.doLogin();
   },
 
   async refreshProfile() {
