@@ -1,647 +1,224 @@
-# ALLINLE - 德州扑克记账与牌技训练工具
+# ALLINLE Poker Platform
 
-> ⚠️ **定位声明**：ALLINLE 是一款德州扑克 **记账工具** 和 **牌技训练工具**，不是线上赌博平台。所有练习筹码仅为模拟筹码，不具备任何财产属性。
+> 一个覆盖微信小程序、实时后端与管理后台的 TypeScript 全栈项目，面向线下德州扑克记账和非现金化牌技训练场景。
 
----
+<p align="center">
+  <img alt="TypeScript 5.5" src="https://img.shields.io/badge/TypeScript-5.5-3178C6?logo=typescript&logoColor=white">
+  <img alt="NestJS 10" src="https://img.shields.io/badge/NestJS-10-E0234E?logo=nestjs&logoColor=white">
+  <img alt="React 18" src="https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=20232A">
+  <img alt="MySQL 8.4" src="https://img.shields.io/badge/MySQL-8.4-4479A1?logo=mysql&logoColor=white">
+  <img alt="Redis 7.2" src="https://img.shields.io/badge/Redis-7.2-DC382D?logo=redis&logoColor=white">
+  <img alt="Tests 45" src="https://img.shields.io/badge/tests-45%20passed-brightgreen">
+</p>
 
-## 目录
+ALLINLE 是一个个人全栈项目，完整实现了客户端、服务端、实时通信、管理后台、数据存储、自动化测试与生产部署。项目重点不只是页面展示，而是处理扑克领域规则、多人房间状态、权限隔离和可运维性等工程问题。
 
-1. [项目概述](#项目概述)
-2. [技术栈](#技术栈)
-3. [项目结构](#项目结构)
-4. [本地开发](#本地开发)
-5. [正式微信登录](#正式微信登录)
-6. [环境变量说明](#环境变量说明)
-7. [管理后台权限系统](#管理后台权限系统)
-8. [生产部署](#生产部署)
-9. [Nginx HTTPS 配置](#nginx-https-配置)
-10. [小程序合法域名配置](#小程序合法域名配置)
-11. [安全加固](#安全加固)
-12. [埋点日志](#埋点日志)
-13. [风控日志](#风控日志)
-14. [健康检查](#健康检查)
-15. [数据库备份与恢复](#数据库备份与恢复)
-16. [上线前审核 Checklist](#上线前审核-checklist)
-17. [常见问题](#常见问题)
-18. [下一步开发建议](#下一步开发建议)
+> 合规说明：项目不包含充值、提现、兑换、支付、抽水或现金交易；练习筹码仅用于模拟训练，不具备财产属性。
 
----
+## 系统架构
 
-## 项目概述
+```mermaid
+flowchart LR
+    Mini["微信小程序<br/>原生 TypeScript + TDesign"]
+    Admin["管理后台<br/>React + Ant Design"]
+    Gateway["Nginx<br/>HTTPS / 静态资源 / 反向代理"]
+    API["NestJS API<br/>REST + Socket.IO"]
+    Domain["共享领域层<br/>状态机 / 牌型评估 / 底池 / Bot"]
+    MySQL[("MySQL 8.4")]
+    Redis[("Redis 7.2")]
 
-ALLINLE 提供三大核心功能：
+    Mini -->|HTTPS / WSS| Gateway
+    Admin -->|HTTPS| Gateway
+    Gateway --> API
+    API --> Domain
+    API -->|Prisma ORM| MySQL
+    API -->|实时牌局状态缓存| Redis
+```
 
-1. **个人/团队记账**：记录线下德州扑克牌局的买入、兑现、盈亏
-2. **线上练习房**：与好友进行私密练习（非公开匹配）
-3. **单人机器人练习**：与 AI 机器人练习牌技，支持手牌复盘和数据分析
-
-### 合规红线
-
-项目从第一天起就遵守以下红线，确保不触碰赌博监管：
-
-- ❌ 不实现充值、提现、兑换、钱包、支付、抽水、分成
-- ❌ 练习筹码不可兑换、不可交易、不可转入记账
-- ❌ 不做公开大厅、不做陌生人匹配
-- ❌ 不做排行榜奖励、不做现金化
-- ❌ 不做自由聊天（仅预设快捷语）
-- ❌ 不做任何与支付、真钱相关的功能
-
----
+项目采用 pnpm Workspace 管理 Monorepo。业务入口拆分为微信小程序、NestJS API 和 React 管理后台，扑克规则与通用类型沉淀在独立共享包中。
 
 ## 技术栈
 
-| 层次     | 技术                         |
-| -------- | ---------------------------- |
-| 小程序   | 微信原生 + TypeScript        |
-| 后端 API | NestJS + TypeScript          |
-| 数据库   | MySQL 8.4 (Prisma ORM)       |
-| 缓存     | Redis 7.2                    |
-| 实时通信 | Socket.IO (WebSocket)        |
-| 管理后台 | React + Vite + TypeScript    |
-| 部署     | Docker Compose / PM2 + Nginx |
+| 层次         | 技术                                         | 用途                                 |
+| ------------ | -------------------------------------------- | ------------------------------------ |
+| 语言与运行时 | TypeScript 5.5、Node.js 22+                  | 全栈类型约束与服务端运行时           |
+| Monorepo     | pnpm Workspace                               | 管理多应用、共享包与统一脚本         |
+| 微信小程序   | 微信原生框架、TDesign、weapp.socket.io       | 用户端记账、练习房与数据分析         |
+| 管理后台     | React 18、Vite 5、Ant Design 5、React Router | 用户、牌局、风控和系统配置管理       |
+| 后端 API     | NestJS 10、RxJS、class-validator、Swagger    | 模块化 REST API、校验和接口文档      |
+| 数据层       | MySQL 8.4、Prisma 5                          | 关系建模、类型安全查询与迁移         |
+| 缓存         | Redis 7.2、ioredis                           | 实时牌局状态缓存与健康检查           |
+| 实时通信     | Socket.IO 4、WebSocket                       | 好友房间状态和牌局事件同步           |
+| 身份与安全   | JWT、bcryptjs、Helmet、RBAC                  | 登录、令牌隔离、密码散列和权限控制   |
+| 测试与质量   | Vitest、TypeScript、Prettier                 | 单元测试、类型检查和代码格式化       |
+| 部署运维     | Docker Compose、PM2、Nginx、Certbot          | 数据服务、进程管理、HTTPS 与反向代理 |
 
----
+## 核心功能
+
+### 记账系统
+
+- 个人牌局与团队牌局记账；
+- 买入、兑现、盈亏和牌局汇总；
+- 团队成员、房间与历史记录管理；
+- 个人及团队维度的数据统计。
+
+### 实时练习系统
+
+- 好友私密练习房创建与加入；
+- 准备、初始筹码确认、牌局动作和下一手流程；
+- 基于 JWT 的 Socket.IO 连接鉴权；
+- 房间状态、公共牌面与私人手牌分层传输；
+- 手牌历史与复盘数据查询。
+
+### 单人 Bot 训练
+
+- 完整的牌堆、发牌、牌型评估与底池计算；
+- 翻牌前和翻牌后的 Bot 决策模块；
+- 可测试的扑克状态机与合法动作约束；
+- 练习统计、趋势分析和历史复盘。
+
+### 管理后台
+
+- `SUPER_ADMIN`、`ADMIN`、`OPERATOR` 三级 RBAC；
+- 用户、管理员、记账牌局和练习房管理；
+- 手牌详情、风险日志与审计日志查询；
+- 系统配置与运营数据面板；
+- 用户令牌和管理员令牌使用独立密钥与守卫。
+
+## 工程亮点
+
+### 1. 独立扑克领域层
+
+`packages/shared` 将容易出错的扑克规则从 Web 框架中拆出，包含：
+
+- 牌堆生成与洗牌；
+- 牌型识别和强度比较；
+- 主池与边池计算；
+- 游戏阶段和玩家动作状态机；
+- 翻牌前、翻牌后 Bot 策略。
+
+领域逻辑保持纯函数和明确类型边界，可独立测试，也避免控制器或页面层重复实现规则。
+
+### 2. 模块化 NestJS 后端
+
+API 按认证、用户、团队、记账、练习房、牌局、统计、风控、后台管理和健康检查拆分模块。统一使用 DTO 校验、响应拦截器、异常过滤器和错误码，降低接口行为不一致的问题。
+
+### 3. 实时状态与数据边界
+
+Socket.IO Gateway 负责连接鉴权和房间事件，领域服务负责状态变更，Prisma 负责持久化。公共牌局状态与玩家私人手牌分别下发，避免将不应公开的数据广播给整个房间。
+
+### 4. 安全与权限设计
+
+- 微信登录通过服务端 `code2Session` 完成，不向客户端返回 `session_key`；
+- 用户 JWT 与管理员 JWT 使用不同密钥和身份范围；
+- 密码使用 bcrypt 散列；
+- API 提供参数白名单、限流、Helmet 安全头和生产错误脱敏；
+- 管理操作、风险事件和关键业务事件保留审计记录；
+- 安全服务可检测生产环境默认密钥，并对日志中的令牌、密码等字段脱敏。
+
+### 5. 可重复部署与运维
+
+- Prisma migration 区分开发生成与生产应用；
+- Docker Compose 提供 MySQL/Redis 开发和生产配置；
+- PM2 配置支持自定义安装目录、日志目录和内存限制；
+- Nginx 模板覆盖 REST、Socket.IO、静态后台和 HTTPS；
+- 提供健康检查、数据库备份、保留周期和带确认的恢复脚本。
+
+## 自动化测试
+
+当前共有 45 项自动化测试：
+
+| 测试层     | 数量 | 覆盖内容                                                 |
+| ---------- | ---: | -------------------------------------------------------- |
+| 共享领域层 |   20 | 牌堆、牌型、底池、状态机、Bot 策略                       |
+| API 服务层 |   25 | 微信登录、RBAC、安全检查、事件日志、游戏锁、团队账目平衡 |
+
+```bash
+pnpm typecheck
+pnpm test
+pnpm --filter @allinle/api test
+pnpm build
+```
 
 ## 项目结构
 
-```
-allinle/
+```text
+allinle-poker-platform/
 ├── apps/
-│   ├── api/           # NestJS API 服务
-│   ├── admin/         # React 管理后台
-│   └── miniprogram/   # 微信小程序
+│   ├── api/             # NestJS API、Socket.IO、Prisma schema
+│   ├── admin/           # React + Ant Design 管理后台
+│   └── miniprogram/     # 原生微信小程序
 ├── packages/
-│   └── shared/        # 共享代码（类型、扑克引擎、错误码）
+│   └── shared/          # 扑克领域引擎、类型、枚举、错误码
 ├── deploy/
-│   ├── nginx/         # Nginx 配置
-│   ├── pm2/           # PM2 进程管理
-│   └── scripts/       # 部署/备份脚本
-├── docker/            # Docker 初始化脚本
+│   ├── nginx/           # 通用 Nginx 配置模板
+│   ├── pm2/             # API 进程配置
+│   └── scripts/         # 主机初始化、备份与恢复脚本
+├── docker/              # MySQL 初始化资源
 ├── docs/
-│   └── api-tests/     # API 测试文件 (.http)
-├── docker-compose.yml       # 本地开发数据库
-├── docker-compose.prod.yml  # 生产环境数据库（仅绑定本机）
-├── .env.example
-└── README.md
+│   ├── api-tests/       # 可直接执行的 HTTP 接口测试
+│   └── deployment.md    # 通用生产部署指南
+├── docker-compose.yml
+└── docker-compose.prod.yml
 ```
 
----
+## 本地运行
 
-## 本地开发
+### 环境要求
 
-### 前置条件
+- Node.js 22+，推荐 Node.js 24 LTS；
+- pnpm 11；
+- Docker Desktop 或 Docker Engine；
+- 微信开发者工具。
 
-- Node.js >= 22（生产环境推荐 Node.js 24 LTS）
-- pnpm (通过 `npm install -g pnpm` 安装)
-- Docker Desktop（用于运行 MySQL 和 Redis）
-
-### 启动步骤
+### 启动 API 与管理后台
 
 ```bash
-# 1. 安装依赖
+git clone https://github.com/MickeyRay0624/allinle-poker-platform.git
+cd allinle-poker-platform
 pnpm install
 
-# 2. 配置环境变量
 cp .env.example .env
-# 编辑 .env 填入本地配置
-
-# 3. 启动数据库和 Redis
 docker compose up -d
 
-# 4. 生成 Prisma Client
 pnpm prisma:generate
-
-# 5. 同步数据库 schema
 pnpm prisma:migrate
-
-# 6. （可选）填充种子数据
 pnpm prisma:seed
-
-# 7. 启动 API 服务
-pnpm dev:api
-
-# 8. 启动管理后台（另一个终端）
-pnpm dev:admin
-
-# 9. 打开管理后台
-open http://localhost:5173
-
-# 10. 查看 API 文档
-open http://localhost:3000/api/docs
+pnpm dev
 ```
 
-### 开发登录
+启动后：
 
-开发环境下可使用 `POST /api/auth/dev-login` 快速获取 token：
+| 服务     | 地址                             |
+| -------- | -------------------------------- |
+| API      | `http://localhost:3000/api`      |
+| Swagger  | `http://localhost:3000/api/docs` |
+| 管理后台 | `http://localhost:5173`          |
+| MySQL    | `127.0.0.1:3306`                 |
+| Redis    | `127.0.0.1:6379`                 |
+
+### 运行微信小程序
 
 ```bash
-curl -X POST http://localhost:3000/api/auth/dev-login \
-  -H "Content-Type: application/json" \
-  -d '{"nickname": "测试用户"}'
+pnpm build:miniprogram:local
 ```
 
-> ⚠️ dev-login **仅限 NODE_ENV !== production** 时使用。生产环境会返回 `AUTH_DEV_LOGIN_DISABLED`。
-
-### 运行测试
-
-```bash
-# 所有测试
-pnpm test
-
-# 仅 API 测试
-pnpm --filter @allinle/api test
-
-# 仅共享包测试
-pnpm --filter @allinle/shared test
-```
-
----
-
-## 正式微信登录
-
-### 获取微信 AppID 和 Secret
-
-1. 登录 [微信公众平台](https://mp.weixin.qq.com/)
-2. 进入「开发」→「开发管理」→「开发设置」
-3. 复制 **AppID** 和 **AppSecret**
-4. **切勿将 AppSecret 提交到 Git！**
-
-### 配置
-
-```env
-WX_APPID=wx1234567890abcdef
-WX_SECRET=your_actual_secret_here
-```
-
-### 生成随机 Secret
-
-```bash
-openssl rand -base64 32
-```
-
-使用此命令生成强随机的 `JWT_SECRET` 和 `ADMIN_JWT_SECRET`。
-
-### 登录流程
-
-```
-小程序端                    API 服务端                 微信服务器
-   |                          |                        |
-   |-- wx.login() ----------->|                        |
-   |                          |-- code2Session ------>|
-   |                          |<-- openid + session_key|
-   |                          |                        |
-   |                          |-- 查找/创建 User       |
-   |<-- JWT token + user -----|                        |
-   |                          |                        |
-   |-- 后续请求带 Bearer ----|                        |
-```
-
-1. 小程序调用 `wx.login()` 获取临时 `code`
-2. 调用 `POST /api/auth/wx-login` 传入 `code`
-3. 服务端调用微信 `code2Session` 换取 `openid`
-4. 根据 `openid` 查找或创建用户
-5. 返回 JWT token（**不返回 session_key**）
-
----
-
-## 环境变量说明
-
-| 变量                          | 说明              | 生产环境要求                                 |
-| ----------------------------- | ----------------- | -------------------------------------------- |
-| `NODE_ENV`                    | 运行环境          | 设置为 `production`                          |
-| `JWT_SECRET`                  | 用户 JWT 密钥     | **必须**使用 `openssl rand -base64 32` 生成  |
-| `ADMIN_JWT_SECRET`            | 管理员 JWT 密钥   | **必须**使用随机生成，不得与 JWT_SECRET 相同 |
-| `WX_APPID`                    | 微信小程序 AppID  | 必填                                         |
-| `WX_SECRET`                   | 微信小程序 Secret | 必填，不得提交 Git                           |
-| `CORS_ORIGIN`                 | 允许的跨域来源    | 设为你的域名                                 |
-| `DATABASE_URL`                | 数据库连接字符串  | 使用强密码                                   |
-| `API_RATE_LIMIT_PER_MINUTE`   | API 限流          | 建议 60                                      |
-| `LOGIN_RATE_LIMIT_PER_MINUTE` | 登录限流          | 建议 10                                      |
-
----
-
-## 管理后台权限系统
-
-### 角色定义
-
-| 角色          | 权限                                             |
-| ------------- | ------------------------------------------------ |
-| `SUPER_ADMIN` | 全部权限：创建管理员、修改系统配置、查看审计日志 |
-| `ADMIN`       | 管理权限：查看用户、管理练习房、查看风控日志     |
-| `OPERATOR`    | 只读权限：查看仪表盘和基本数据                   |
-
-### 首次登录
-
-首次使用默认账号登录会自动创建 SUPER_ADMIN：
-
-- 用户名：`admin`
-- 密码：`admin123456`
-
-> ⚠️ **生产环境必须修改默认密码！**
-
-### 用户 Token 与管理 Token 隔离
-
-- 用户接口（小程序）使用 `JWT_SECRET` 签名，`type: "USER"`
-- 管理员接口使用 `ADMIN_JWT_SECRET` 签名，`type: "ADMIN"`
-- 两套 token **不可混用**
-
----
+然后在微信开发者工具中导入 `apps/miniprogram`。本地开发配置位于 `.env` 和小程序项目配置文件中，生产密钥不得提交到仓库。
 
 ## 生产部署
 
-以下流程适用于单台 Ubuntu 22.04/24.04 服务器：API 由 PM2 管理，管理后台由 Nginx 提供静态文件，MySQL/Redis 可使用托管服务或 Docker Compose。示例安装目录为 `/opt/allinle`，可替换为任意绝对路径。
+项目提供 Ubuntu、PM2、Nginx、Certbot、Docker Compose、Prisma migration 和数据库备份的完整流程：
 
-### 1. 部署前准备
+**[查看通用生产部署指南](docs/deployment.md)**
 
-- 创建具有 `sudo` 权限的普通用户，并使用 SSH 密钥登录。
-- 将 API 与管理后台域名的 DNS A/AAAA 记录指向服务器。
-- 防火墙仅对外开放 SSH、HTTP 和 HTTPS；不要公开 MySQL、Redis 端口。
-- 安装 Git；如使用本机数据库，再按照 [Docker 官方 Ubuntu 指南](https://docs.docker.com/engine/install/ubuntu/) 安装 Docker Engine 与 Compose 插件。
+## 后续演进方向
 
-先设置本次部署使用的变量：
-
-```bash
-export REPOSITORY_URL="https://github.com/<owner>/<repository>.git"
-export INSTALL_DIR="/opt/allinle"
-export API_DOMAIN="api.example.com"
-export ADMIN_DOMAIN="admin.example.com"
-```
-
-### 2. 克隆项目并初始化服务器
-
-```bash
-sudo mkdir -p "$INSTALL_DIR"
-sudo chown "$USER":"$(id -gn)" "$INSTALL_DIR"
-git clone "$REPOSITORY_URL" "$INSTALL_DIR"
-cd "$INSTALL_DIR"
-
-sudo ALLINLE_ROOT="$INSTALL_DIR" ALLINLE_USER="$USER" \
-  bash deploy/scripts/setup-server.sh
-
-pnpm install --frozen-lockfile
-```
-
-初始化脚本会确保使用受支持的 Node.js 版本（全新服务器默认安装 Node.js 24 LTS），并安装 pnpm、PM2、Nginx、Certbot 和 MySQL 客户端。重复执行不会覆盖项目配置。
-
-### 3. 配置生产环境变量
-
-```bash
-cd "$INSTALL_DIR"
-cp .env.example .env
-chmod 600 .env
-vim .env
-```
-
-至少修改以下配置，禁止使用示例密码：
-
-| 变量                       | 生产环境示例或说明                               |
-| -------------------------- | ------------------------------------------------ |
-| `NODE_ENV`                 | `production`                                     |
-| `JWT_SECRET`               | 使用 `openssl rand -hex 32` 生成                 |
-| `ADMIN_JWT_SECRET`         | 单独生成，不可与用户 JWT 密钥相同                |
-| `ADMIN_DEFAULT_PASSWORD`   | 设置强随机密码                                   |
-| `DATABASE_URL`             | Prisma 使用的 MySQL 连接地址                     |
-| `MYSQL_*`                  | 本机 Compose 或备份脚本使用的数据库配置          |
-| `REDIS_HOST/PORT/PASSWORD` | Redis 连接信息，生产环境必须设置密码             |
-| `CORS_ORIGIN`              | 管理后台完整地址，如 `https://admin.example.com` |
-| `PUBLIC_BASE_URL`          | API 完整地址，如 `https://api.example.com`       |
-| `WX_APPID/WX_SECRET`       | 微信小程序后台提供的凭据                         |
-
-`.env` 只保存在服务器，不得提交到 Git。若数据库密码含有 `@`、`:`、`/` 等字符，写入 `DATABASE_URL` 前需要进行 URL 编码。
-
-### 4. 启动 MySQL 与 Redis
-
-使用云数据库或已有数据库时，只需在 `.env` 中填写连接信息并跳过本步骤。
-
-在同一台服务器使用 Docker 时：
-
-```bash
-cd "$INSTALL_DIR"
-docker compose -f docker-compose.prod.yml up -d
-docker compose -f docker-compose.prod.yml ps
-```
-
-生产 Compose 仅将数据库端口绑定到 `127.0.0.1`，不会直接暴露到公网。
-
-### 5. 数据库迁移与构建
-
-```bash
-cd "$INSTALL_DIR"
-pnpm prisma:generate
-pnpm prisma:deploy
-pnpm build
-mkdir -p logs apps/api/uploads backups
-```
-
-生产环境必须使用 `prisma migrate deploy`，不要使用会创建开发迁移的 `prisma migrate dev`。
-
-### 6. 使用 PM2 启动 API
-
-```bash
-cd "$INSTALL_DIR"
-set -a
-. ./.env
-set +a
-ALLINLE_ROOT="$INSTALL_DIR" pm2 start deploy/pm2/ecosystem.config.js
-pm2 save
-pm2 startup
-```
-
-执行 `pm2 startup` 后，还需要运行它在终端输出的那条 `sudo` 命令，才能启用开机自启。由于实时房间使用 Socket.IO，默认只启动一个 API 实例；接入跨实例 Socket.IO 适配器后，才可通过 `WEB_CONCURRENCY` 安全扩容。
-
-### 7. 后续更新
-
-更新前先备份数据库，然后执行：
-
-```bash
-cd "$INSTALL_DIR"
-git pull --ff-only
-pnpm install --frozen-lockfile
-pnpm prisma:generate
-pnpm prisma:deploy
-pnpm build
-set -a
-. ./.env
-set +a
-ALLINLE_ROOT="$INSTALL_DIR" pm2 reload deploy/pm2/ecosystem.config.js --update-env
-```
+- 接入 Socket.IO Redis Adapter，支持多 API 实例横向扩展；
+- 增加端到端测试与 GitHub Actions CI/CD；
+- 将上传文件迁移至对象存储；
+- 接入结构化日志、指标与告警平台；
+- 继续拆分统计查询与实时牌局写模型。
 
 ---
 
-## Nginx HTTPS 配置
-
-仓库中的 `deploy/nginx/allinle.conf` 是通用 HTTP 模板。先替换示例域名和安装目录，再由 Certbot 自动添加 HTTPS 配置。
-
-```bash
-cd "$INSTALL_DIR"
-sudo cp deploy/nginx/allinle.conf /etc/nginx/sites-available/allinle
-sudo sed -i "s#api.example.com#$API_DOMAIN#g" /etc/nginx/sites-available/allinle
-sudo sed -i "s#admin.example.com#$ADMIN_DOMAIN#g" /etc/nginx/sites-available/allinle
-sudo sed -i "s#/opt/allinle#$INSTALL_DIR#g" /etc/nginx/sites-available/allinle
-sudo ln -sfn /etc/nginx/sites-available/allinle /etc/nginx/sites-enabled/allinle
-sudo nginx -t
-sudo systemctl reload nginx
-
-sudo certbot --nginx -d "$API_DOMAIN" -d "$ADMIN_DOMAIN"
-```
-
-Certbot 安装包会创建自动续期任务，可使用以下命令验证：
-
-```bash
-sudo certbot renew --dry-run
-```
-
-部署后检查：
-
-```bash
-curl "https://$API_DOMAIN/api/health"
-pm2 status
-pm2 logs allinle-api --lines 100
-```
-
-相关官方参考：[Prisma 生产迁移](https://www.prisma.io/docs/cli/migrate/deploy)、[PM2 开机自启](https://pm2.keymetrics.io/docs/usage/startup/)、[Docker Compose 生产部署](https://docs.docker.com/compose/how-tos/production/)、[Certbot Nginx 配置](https://certbot.eff.org/instructions?ws=nginx)。
-
----
-
-## 小程序合法域名配置
-
-在微信公众平台「开发」→「开发管理」→「开发设置」中配置：
-
-### request 合法域名
-
-```
-https://api.example.com
-```
-
-### socket 合法域名
-
-```
-wss://api.example.com
-```
-
-> 域名必须已备案、已配置 HTTPS、且不在微信黑名单中。
-
----
-
-## 安全加固
-
-### 已实施的安全措施
-
-1. **JWT Token 分离**：用户 token 和管理员 token 使用不同密钥
-2. **CORS 白名单**：生产环境通过 `CORS_ORIGIN` 白名单控制
-3. **Rate Limiting**：全局限流 + 登录接口更严格限流
-4. **Helmet 安全头**：自动添加 CSP、HSTS、X-Frame-Options 等
-5. **敏感词过滤**：自动检测赌博、支付、代理等敏感词汇
-6. **Token 脱敏**：日志中自动隐藏 Bearer token 和密码字段
-7. **生产环境密钥检查**：启动时检查 JWT_SECRET 是否使用默认值
-8. **错误信息脱敏**：生产环境不暴露内部错误详情
-9. **Swagger 生产禁用**：生产环境不暴露 API 文档
-10. **管理审计日志**：所有管理操作完整记录
-
----
-
-## 埋点日志
-
-### 事件上报
-
-```bash
-POST /api/events/track
-Content-Type: application/json
-
-{
-  "eventName": "page_view",
-  "eventGroup": "miniprogram",
-  "metadata": { "page": "/pages/index/index" }
-}
-```
-
-### 预定义事件
-
-| 事件组        | 事件名          | 说明       |
-| ------------- | --------------- | ---------- |
-| `miniprogram` | `app_launch`    | 小程序启动 |
-| `miniprogram` | `page_view`     | 页面浏览   |
-| `auth`        | `login_success` | 登录成功   |
-| `auth`        | `login_fail`    | 登录失败   |
-| `practice`    | `room_create`   | 创建练习房 |
-| `practice`    | `room_join`     | 加入练习房 |
-| `practice`    | `hand_start`    | 手牌开始   |
-| `practice`    | `hand_end`      | 手牌结束   |
-| `ledger`      | `game_create`   | 创建记账   |
-| `ledger`      | `game_confirm`  | 确认记账   |
-
----
-
-## 风控日志
-
-系统自动记录以下风控事件：
-
-- `HIGH_CHIPS_ROOM`：练习房初始筹码过高
-- `COMPLIANCE_NOT_CONFIRMED`：未确认合规声明
-- `SUSPICIOUS_ACTION`：可疑游戏操作
-- `ROOM_CLOSED_BY_ADMIN`：管理员关闭房间
-
-管理后台可在「风控日志」页面查看。
-
----
-
-## 健康检查
-
-```bash
-GET /api/health
-```
-
-返回示例：
-
-```json
-{
-  "status": "ok",
-  "timestamp": "2026-07-09T10:00:00.000Z",
-  "uptime": 3600.5,
-  "checks": {
-    "db": { "status": "ok" },
-    "redis": { "status": "ok" }
-  }
-}
-```
-
----
-
-## 数据库备份与恢复
-
-备份脚本默认从项目根目录的 `.env` 读取数据库连接，并将文件保存到 `<项目目录>/backups`。可通过 `ALLINLE_ROOT`、`ALLINLE_ENV_FILE`、`BACKUP_DIR` 和 `BACKUP_RETENTION_DAYS` 覆盖默认值。
-
-### 定时备份
-
-```bash
-crontab -e
-
-# 每天凌晨 2 点备份；将 /opt/allinle 替换为实际安装目录
-0 2 * * * ALLINLE_ROOT=/opt/allinle /opt/allinle/deploy/scripts/backup-db.sh >> /opt/allinle/logs/backup.log 2>&1
-```
-
-### 手动备份
-
-```bash
-cd /opt/allinle
-bash deploy/scripts/backup-db.sh
-```
-
-### 恢复
-
-```bash
-cd /opt/allinle
-bash deploy/scripts/restore-db.sh backups/allinle_YYYYMMDD_HHMMSS.sql.gz
-```
-
-恢复会要求输入 `RESTORE` 二次确认。自动化恢复时可在文件参数后添加 `--yes`。
-
----
-
-## 上线前审核 Checklist
-
-### 小程序审核准备
-
-- [ ] AppID 和 Secret 已配置
-- [ ] request 合法域名已添加
-- [ ] socket 合法域名已添加
-- [ ] HTTPS 证书有效
-- [ ] 服务器域名已备案
-- [ ] 所有页面文案检查（无赌博暗示）
-- [ ] 功能页面完整可操作
-- [ ] 无隐藏的支付/充值入口
-- [ ] 练习页面明确标注"模拟筹码，不具备财产属性"
-- [ ] 合规声明弹窗可正常展示
-- [ ] 用户协议和隐私政策链接可用
-- [ ] 类目选择：工具 > 记账 或 教育 > 培训
-
-### 安全审核
-
-- [ ] JWT_SECRET 和 ADMIN_JWT_SECRET 使用强随机值
-- [ ] WX_SECRET 未提交到代码仓库
-- [ ] CORS 白名单正确配置
-- [ ] HTTPS 已启用
-- [ ] Swagger 在生产环境已禁用
-- [ ] 错误信息不泄露内部细节
-- [ ] 日志中不包含敏感信息（token、密码）
-
-### 运维准备
-
-- [ ] 数据库备份 cron 已配置
-- [ ] PM2 已配置开机自启
-- [ ] SSL 证书自动续期已配置
-- [ ] 监控告警已配置
-- [ ] 文档已更新
-
----
-
-## 常见问题
-
-### 1. wx-login 报 invalid code
-
-`code` 由 `wx.login()` 获取，**只能使用一次**且有效期为 5 分钟。确保是小程序端实时获取的 code，不要重复使用。
-
-### 2. 小程序请求不在合法域名
-
-在微信公众平台配置 `request 合法域名`，必须是 HTTPS 且已备案的域名。开发阶段可在开发者工具中勾选「不校验合法域名」。
-
-### 3. socket 合法域名错误
-
-WebSocket 连接使用 `wss://` 协议，需要在公众平台配置 `socket 合法域名`。
-
-### 4. HTTPS 证书无效
-
-确保使用 Let's Encrypt 或其他可信 CA 签发的证书。自签名证书在小程序中不被信任。
-
-### 5. WebSocket 连接失败
-
-检查 Nginx 是否正确配置了 WebSocket 升级（参考 `deploy/nginx/allinle.conf`）。
-
-### 6. CORS 报错
-
-检查 `CORS_ORIGIN` 环境变量是否包含请求来源的域名。
-
-### 7. Nginx 502
-
-通常是后端服务未启动或 PM2 进程崩溃。检查 `pm2 status` 和 `pm2 logs`。
-
-### 8. PM2 进程启动失败
-
-检查 `dist/main.js` 是否存在（需要先 `pnpm build:api`），以及环境变量是否正确加载。
-
-### 9. Prisma migration 失败
-
-确保 `DATABASE_URL` 正确且数据库可访问。生产环境使用 `pnpm prisma:deploy` 重新执行已有迁移。
-
-### 10. Redis 连接失败
-
-检查 Redis 服务是否启动且密码正确。Docker 环境运行 `docker compose -f docker-compose.prod.yml ps` 查看状态。
-
-### 11. 生产环境 dev-login 不可用
-
-这是设计如此。生产环境 `NODE_ENV=production` 时 dev-login 会自动返回 403 错误。
-
-### 12. 管理后台无权限
-
-确认登录账号的角色权限。OPERATOR 角色只有只读权限，SUPER_ADMIN 拥有全部权限。
-
-### 13. Swagger 生产环境访问不了
-
-生产环境自动禁用 Swagger 文档。可在开发环境通过 `http://localhost:3000/api/docs` 查看。
-
-### 14. 小程序审核如何解释线上练习
-
-建议说明：「本功能为德州扑克牌技练习和记账工具，所有筹码为模拟训练用虚拟筹码，不具备财产属性，不提供充值、提现、兑换功能。」
-
----
-
-## 下一步开发建议（第六阶段）
-
-1. **CI/CD 流水线**：GitHub Actions 自动化测试和部署
-2. **监控告警**：接入 Sentry/DataDog 进行错误监控
-3. **性能优化**：Redis 缓存热点数据，API 响应压缩
-4. **日志聚合**：ELK 或 Loki 集中管理日志
-5. **多语言支持**：i18n 国际化
-6. **数据大盘**：管理后台增加图表和数据可视化
-7. **通知系统**：小程序订阅消息推送
-8. **灰度发布**：支持按比例分流到不同版本
+Maintained by [MickeyRay0624](https://github.com/MickeyRay0624)
