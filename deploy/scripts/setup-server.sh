@@ -1,46 +1,57 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env bash
+set -Eeuo pipefail
 
-echo "=== ALLINLE Server Setup ==="
+PROJECT_ROOT="${ALLINLE_ROOT:-/opt/allinle}"
+DEPLOY_USER="${ALLINLE_USER:-${SUDO_USER:-$USER}}"
 
-# Install Node.js 20+
-if ! command -v node &> /dev/null; then
-  echo "Installing Node.js 20..."
-  curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-  sudo apt-get install -y nodejs
+if [ "$(id -u)" -eq 0 ]; then
+  SUDO=()
+else
+  SUDO=(sudo)
 fi
 
-# Install pnpm
-if ! command -v pnpm &> /dev/null; then
-  echo "Installing pnpm..."
-  npm install -g pnpm
+if ! id "$DEPLOY_USER" >/dev/null 2>&1; then
+  echo "Deployment user does not exist: $DEPLOY_USER" >&2
+  exit 1
 fi
 
-# Install PM2
-if ! command -v pm2 &> /dev/null; then
-  echo "Installing PM2..."
-  npm install -g pm2
+echo "Installing ALLINLE host dependencies..."
+"${SUDO[@]}" apt-get update
+"${SUDO[@]}" apt-get install -y \
+  ca-certificates \
+  curl \
+  git \
+  nginx \
+  certbot \
+  python3-certbot-nginx \
+  default-mysql-client
+
+NODE_MAJOR=0
+if command -v node >/dev/null 2>&1; then
+  NODE_MAJOR="$(node -p 'Number(process.versions.node.split(".")[0])')"
 fi
 
-# Install Nginx
-if ! command -v nginx &> /dev/null; then
-  echo "Installing Nginx..."
-  sudo apt-get update && sudo apt-get install -y nginx
+if [ "$NODE_MAJOR" -lt 22 ] || [ $((NODE_MAJOR % 2)) -ne 0 ]; then
+  curl -fsSL https://deb.nodesource.com/setup_24.x | "${SUDO[@]}" bash -
+  "${SUDO[@]}" apt-get install -y nodejs
 fi
 
-# Install Certbot
-if ! command -v certbot &> /dev/null; then
-  echo "Installing Certbot..."
-  sudo apt-get install -y certbot python3-certbot-nginx
+if ! command -v pnpm >/dev/null 2>&1; then
+  "${SUDO[@]}" npm install -g pnpm@11
 fi
 
-echo "=== Setup Complete ==="
-echo "Next steps:"
-echo "1. Copy deploy/nginx/allinle.conf to /etc/nginx/sites-available/"
-echo "2. Run: sudo certbot --nginx -d api.allinle.example.com -d admin.allinle.example.com"
-echo "3. Copy project to /var/www/allinle/"
-echo "4. cd /var/www/allinle && pnpm install && pnpm prisma:generate"
-echo "5. Configure .env for production"
-echo "6. Run: pnpm prisma:migrate && pnpm build:api"
-echo "7. Start: pm2 start deploy/pm2/ecosystem.config.js"
-echo "8. Setup cron: 0 2 * * * /var/www/allinle/deploy/scripts/backup-db.sh"
+if ! command -v pm2 >/dev/null 2>&1; then
+  "${SUDO[@]}" npm install -g pm2
+fi
+
+DEPLOY_GROUP="$(id -gn "$DEPLOY_USER")"
+"${SUDO[@]}" install -d -o "$DEPLOY_USER" -g "$DEPLOY_GROUP" \
+  "$PROJECT_ROOT" \
+  "$PROJECT_ROOT/logs" \
+  "$PROJECT_ROOT/backups"
+
+echo "Host setup complete."
+echo "Project directory: $PROJECT_ROOT"
+echo "Deployment user: $DEPLOY_USER"
+echo "Next: clone the repository and follow the production deployment section in README.md."
+echo "Install Docker Engine with the Compose plugin only when running MySQL and Redis locally."

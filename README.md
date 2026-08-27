@@ -50,15 +50,15 @@ ALLINLE 提供三大核心功能：
 
 ## 技术栈
 
-| 层次 | 技术 |
-|------|------|
-| 小程序 | 微信原生 + TypeScript |
-| 后端 API | NestJS + TypeScript |
-| 数据库 | MySQL 8.4 (Prisma ORM) |
-| 缓存 | Redis 7.2 |
-| 实时通信 | Socket.IO (WebSocket) |
-| 管理后台 | React + Vite + TypeScript |
-| 部署 | Docker Compose / PM2 + Nginx |
+| 层次     | 技术                         |
+| -------- | ---------------------------- |
+| 小程序   | 微信原生 + TypeScript        |
+| 后端 API | NestJS + TypeScript          |
+| 数据库   | MySQL 8.4 (Prisma ORM)       |
+| 缓存     | Redis 7.2                    |
+| 实时通信 | Socket.IO (WebSocket)        |
+| 管理后台 | React + Vite + TypeScript    |
+| 部署     | Docker Compose / PM2 + Nginx |
 
 ---
 
@@ -79,7 +79,8 @@ allinle/
 ├── docker/            # Docker 初始化脚本
 ├── docs/
 │   └── api-tests/     # API 测试文件 (.http)
-├── docker-compose.yml
+├── docker-compose.yml       # 本地开发数据库
+├── docker-compose.prod.yml  # 生产环境数据库（仅绑定本机）
 ├── .env.example
 └── README.md
 ```
@@ -90,7 +91,7 @@ allinle/
 
 ### 前置条件
 
-- Node.js >= 20
+- Node.js >= 22（生产环境推荐 Node.js 24 LTS）
 - pnpm (通过 `npm install -g pnpm` 安装)
 - Docker Desktop（用于运行 MySQL 和 Redis）
 
@@ -105,7 +106,7 @@ cp .env.example .env
 # 编辑 .env 填入本地配置
 
 # 3. 启动数据库和 Redis
-docker-compose up -d
+docker compose up -d
 
 # 4. 生成 Prisma Client
 pnpm prisma:generate
@@ -205,17 +206,17 @@ openssl rand -base64 32
 
 ## 环境变量说明
 
-| 变量 | 说明 | 生产环境要求 |
-|------|------|------------|
-| `NODE_ENV` | 运行环境 | 设置为 `production` |
-| `JWT_SECRET` | 用户 JWT 密钥 | **必须**使用 `openssl rand -base64 32` 生成 |
-| `ADMIN_JWT_SECRET` | 管理员 JWT 密钥 | **必须**使用随机生成，不得与 JWT_SECRET 相同 |
-| `WX_APPID` | 微信小程序 AppID | 必填 |
-| `WX_SECRET` | 微信小程序 Secret | 必填，不得提交 Git |
-| `CORS_ORIGIN` | 允许的跨域来源 | 设为你的域名 |
-| `DATABASE_URL` | 数据库连接字符串 | 使用强密码 |
-| `API_RATE_LIMIT_PER_MINUTE` | API 限流 | 建议 60 |
-| `LOGIN_RATE_LIMIT_PER_MINUTE` | 登录限流 | 建议 10 |
+| 变量                          | 说明              | 生产环境要求                                 |
+| ----------------------------- | ----------------- | -------------------------------------------- |
+| `NODE_ENV`                    | 运行环境          | 设置为 `production`                          |
+| `JWT_SECRET`                  | 用户 JWT 密钥     | **必须**使用 `openssl rand -base64 32` 生成  |
+| `ADMIN_JWT_SECRET`            | 管理员 JWT 密钥   | **必须**使用随机生成，不得与 JWT_SECRET 相同 |
+| `WX_APPID`                    | 微信小程序 AppID  | 必填                                         |
+| `WX_SECRET`                   | 微信小程序 Secret | 必填，不得提交 Git                           |
+| `CORS_ORIGIN`                 | 允许的跨域来源    | 设为你的域名                                 |
+| `DATABASE_URL`                | 数据库连接字符串  | 使用强密码                                   |
+| `API_RATE_LIMIT_PER_MINUTE`   | API 限流          | 建议 60                                      |
+| `LOGIN_RATE_LIMIT_PER_MINUTE` | 登录限流          | 建议 10                                      |
 
 ---
 
@@ -223,11 +224,11 @@ openssl rand -base64 32
 
 ### 角色定义
 
-| 角色 | 权限 |
-|------|------|
+| 角色          | 权限                                             |
+| ------------- | ------------------------------------------------ |
 | `SUPER_ADMIN` | 全部权限：创建管理员、修改系统配置、查看审计日志 |
-| `ADMIN` | 管理权限：查看用户、管理练习房、查看风控日志 |
-| `OPERATOR` | 只读权限：查看仪表盘和基本数据 |
+| `ADMIN`       | 管理权限：查看用户、管理练习房、查看风控日志     |
+| `OPERATOR`    | 只读权限：查看仪表盘和基本数据                   |
 
 ### 首次登录
 
@@ -248,97 +249,157 @@ openssl rand -base64 32
 
 ## 生产部署
 
-### 1. 服务器初始化
+以下流程适用于单台 Ubuntu 22.04/24.04 服务器：API 由 PM2 管理，管理后台由 Nginx 提供静态文件，MySQL/Redis 可使用托管服务或 Docker Compose。示例安装目录为 `/opt/allinle`，可替换为任意绝对路径。
+
+### 1. 部署前准备
+
+- 创建具有 `sudo` 权限的普通用户，并使用 SSH 密钥登录。
+- 将 API 与管理后台域名的 DNS A/AAAA 记录指向服务器。
+- 防火墙仅对外开放 SSH、HTTP 和 HTTPS；不要公开 MySQL、Redis 端口。
+- 安装 Git；如使用本机数据库，再按照 [Docker 官方 Ubuntu 指南](https://docs.docker.com/engine/install/ubuntu/) 安装 Docker Engine 与 Compose 插件。
+
+先设置本次部署使用的变量：
 
 ```bash
-# 运行初始化脚本
-sudo bash deploy/scripts/setup-server.sh
+export REPOSITORY_URL="https://github.com/<owner>/<repository>.git"
+export INSTALL_DIR="/opt/allinle"
+export API_DOMAIN="api.example.com"
+export ADMIN_DOMAIN="admin.example.com"
 ```
 
-该脚本会自动安装 Node.js 20+、pnpm、PM2、Nginx、Certbot。
-
-### 2. 部署 API
+### 2. 克隆项目并初始化服务器
 
 ```bash
-# 克隆项目
-cd /var/www
-git clone <your-repo> allinle
-cd allinle
+sudo mkdir -p "$INSTALL_DIR"
+sudo chown "$USER":"$(id -gn)" "$INSTALL_DIR"
+git clone "$REPOSITORY_URL" "$INSTALL_DIR"
+cd "$INSTALL_DIR"
 
-# 安装依赖
-pnpm install
+sudo ALLINLE_ROOT="$INSTALL_DIR" ALLINLE_USER="$USER" \
+  bash deploy/scripts/setup-server.sh
 
-# 配置环境变量
+pnpm install --frozen-lockfile
+```
+
+初始化脚本会确保使用受支持的 Node.js 版本（全新服务器默认安装 Node.js 24 LTS），并安装 pnpm、PM2、Nginx、Certbot 和 MySQL 客户端。重复执行不会覆盖项目配置。
+
+### 3. 配置生产环境变量
+
+```bash
+cd "$INSTALL_DIR"
 cp .env.example .env
-vim .env  # 填入生产配置
+chmod 600 .env
+vim .env
+```
 
-# 生成 Prisma Client 并迁移
-export $(cat .env | xargs)
+至少修改以下配置，禁止使用示例密码：
+
+| 变量                       | 生产环境示例或说明                               |
+| -------------------------- | ------------------------------------------------ |
+| `NODE_ENV`                 | `production`                                     |
+| `JWT_SECRET`               | 使用 `openssl rand -hex 32` 生成                 |
+| `ADMIN_JWT_SECRET`         | 单独生成，不可与用户 JWT 密钥相同                |
+| `ADMIN_DEFAULT_PASSWORD`   | 设置强随机密码                                   |
+| `DATABASE_URL`             | Prisma 使用的 MySQL 连接地址                     |
+| `MYSQL_*`                  | 本机 Compose 或备份脚本使用的数据库配置          |
+| `REDIS_HOST/PORT/PASSWORD` | Redis 连接信息，生产环境必须设置密码             |
+| `CORS_ORIGIN`              | 管理后台完整地址，如 `https://admin.example.com` |
+| `PUBLIC_BASE_URL`          | API 完整地址，如 `https://api.example.com`       |
+| `WX_APPID/WX_SECRET`       | 微信小程序后台提供的凭据                         |
+
+`.env` 只保存在服务器，不得提交到 Git。若数据库密码含有 `@`、`:`、`/` 等字符，写入 `DATABASE_URL` 前需要进行 URL 编码。
+
+### 4. 启动 MySQL 与 Redis
+
+使用云数据库或已有数据库时，只需在 `.env` 中填写连接信息并跳过本步骤。
+
+在同一台服务器使用 Docker 时：
+
+```bash
+cd "$INSTALL_DIR"
+docker compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml ps
+```
+
+生产 Compose 仅将数据库端口绑定到 `127.0.0.1`，不会直接暴露到公网。
+
+### 5. 数据库迁移与构建
+
+```bash
+cd "$INSTALL_DIR"
 pnpm prisma:generate
-pnpm prisma:migrate
+pnpm prisma:deploy
+pnpm build
+mkdir -p logs apps/api/uploads backups
+```
 
-# 构建
-pnpm build:api
+生产环境必须使用 `prisma migrate deploy`，不要使用会创建开发迁移的 `prisma migrate dev`。
 
-# 使用 PM2 启动
-pm2 start deploy/pm2/ecosystem.config.js
+### 6. 使用 PM2 启动 API
+
+```bash
+cd "$INSTALL_DIR"
+set -a
+. ./.env
+set +a
+ALLINLE_ROOT="$INSTALL_DIR" pm2 start deploy/pm2/ecosystem.config.js
 pm2 save
 pm2 startup
 ```
 
-### 3. 部署管理后台
+执行 `pm2 startup` 后，还需要运行它在终端输出的那条 `sudo` 命令，才能启用开机自启。由于实时房间使用 Socket.IO，默认只启动一个 API 实例；接入跨实例 Socket.IO 适配器后，才可通过 `WEB_CONCURRENCY` 安全扩容。
+
+### 7. 后续更新
+
+更新前先备份数据库，然后执行：
 
 ```bash
-pnpm build:admin
-sudo cp -r apps/admin/dist/* /var/www/allinle/admin/
-```
-
-### 4. Docker Compose（生产数据库）
-
-> ⚠️ 生产环境建议使用云服务商提供的 MySQL/Redis，而非 Docker。
-
-如果使用 Docker Compose：
-
-```bash
-# 修改 docker-compose.yml 中的端口映射和密码
-docker-compose -f docker-compose.prod.yml up -d
+cd "$INSTALL_DIR"
+git pull --ff-only
+pnpm install --frozen-lockfile
+pnpm prisma:generate
+pnpm prisma:deploy
+pnpm build
+set -a
+. ./.env
+set +a
+ALLINLE_ROOT="$INSTALL_DIR" pm2 reload deploy/pm2/ecosystem.config.js --update-env
 ```
 
 ---
 
 ## Nginx HTTPS 配置
 
-### 获取 SSL 证书
+仓库中的 `deploy/nginx/allinle.conf` 是通用 HTTP 模板。先替换示例域名和安装目录，再由 Certbot 自动添加 HTTPS 配置。
 
 ```bash
-sudo certbot --nginx -d api.allinle.example.com -d admin.allinle.example.com
-```
-
-### Nginx 配置文件
-
-参考 `deploy/nginx/allinle.conf`，包含：
-
-- HTTP → HTTPS 强制跳转
-- SSL/TLS 1.2+ 配置
-- WebSocket 反向代理（`/practice-room` 路径升级为 WebSocket）
-- 安全头（X-Frame-Options, HSTS 等）
-
-### 部署 Nginx 配置
-
-```bash
+cd "$INSTALL_DIR"
 sudo cp deploy/nginx/allinle.conf /etc/nginx/sites-available/allinle
-sudo ln -s /etc/nginx/sites-available/allinle /etc/nginx/sites-enabled/
+sudo sed -i "s#api.example.com#$API_DOMAIN#g" /etc/nginx/sites-available/allinle
+sudo sed -i "s#admin.example.com#$ADMIN_DOMAIN#g" /etc/nginx/sites-available/allinle
+sudo sed -i "s#/opt/allinle#$INSTALL_DIR#g" /etc/nginx/sites-available/allinle
+sudo ln -sfn /etc/nginx/sites-available/allinle /etc/nginx/sites-enabled/allinle
 sudo nginx -t
 sudo systemctl reload nginx
+
+sudo certbot --nginx -d "$API_DOMAIN" -d "$ADMIN_DOMAIN"
 ```
 
-### 配置定时证书续期
+Certbot 安装包会创建自动续期任务，可使用以下命令验证：
 
 ```bash
-sudo crontab -e
-# 添加：
-0 3 * * * certbot renew --quiet --post-hook "systemctl reload nginx"
+sudo certbot renew --dry-run
 ```
+
+部署后检查：
+
+```bash
+curl "https://$API_DOMAIN/api/health"
+pm2 status
+pm2 logs allinle-api --lines 100
+```
+
+相关官方参考：[Prisma 生产迁移](https://www.prisma.io/docs/cli/migrate/deploy)、[PM2 开机自启](https://pm2.keymetrics.io/docs/usage/startup/)、[Docker Compose 生产部署](https://docs.docker.com/compose/how-tos/production/)、[Certbot Nginx 配置](https://certbot.eff.org/instructions?ws=nginx)。
 
 ---
 
@@ -347,13 +408,15 @@ sudo crontab -e
 在微信公众平台「开发」→「开发管理」→「开发设置」中配置：
 
 ### request 合法域名
+
 ```
-https://api.allinle.example.com
+https://api.example.com
 ```
 
 ### socket 合法域名
+
 ```
-wss://api.allinle.example.com
+wss://api.example.com
 ```
 
 > 域名必须已备案、已配置 HTTPS、且不在微信黑名单中。
@@ -394,18 +457,18 @@ Content-Type: application/json
 
 ### 预定义事件
 
-| 事件组 | 事件名 | 说明 |
-|--------|--------|------|
-| `miniprogram` | `app_launch` | 小程序启动 |
-| `miniprogram` | `page_view` | 页面浏览 |
-| `auth` | `login_success` | 登录成功 |
-| `auth` | `login_fail` | 登录失败 |
-| `practice` | `room_create` | 创建练习房 |
-| `practice` | `room_join` | 加入练习房 |
-| `practice` | `hand_start` | 手牌开始 |
-| `practice` | `hand_end` | 手牌结束 |
-| `ledger` | `game_create` | 创建记账 |
-| `ledger` | `game_confirm` | 确认记账 |
+| 事件组        | 事件名          | 说明       |
+| ------------- | --------------- | ---------- |
+| `miniprogram` | `app_launch`    | 小程序启动 |
+| `miniprogram` | `page_view`     | 页面浏览   |
+| `auth`        | `login_success` | 登录成功   |
+| `auth`        | `login_fail`    | 登录失败   |
+| `practice`    | `room_create`   | 创建练习房 |
+| `practice`    | `room_join`     | 加入练习房 |
+| `practice`    | `hand_start`    | 手牌开始   |
+| `practice`    | `hand_end`      | 手牌结束   |
+| `ledger`      | `game_create`   | 创建记账   |
+| `ledger`      | `game_confirm`  | 确认记账   |
 
 ---
 
@@ -446,27 +509,32 @@ GET /api/health
 
 ## 数据库备份与恢复
 
+备份脚本默认从项目根目录的 `.env` 读取数据库连接，并将文件保存到 `<项目目录>/backups`。可通过 `ALLINLE_ROOT`、`ALLINLE_ENV_FILE`、`BACKUP_DIR` 和 `BACKUP_RETENTION_DAYS` 覆盖默认值。
+
 ### 定时备份
 
 ```bash
-# 添加 cron 任务
 crontab -e
-# 每天凌晨 2 点备份
-0 2 * * * /var/www/allinle/deploy/scripts/backup-db.sh
+
+# 每天凌晨 2 点备份；将 /opt/allinle 替换为实际安装目录
+0 2 * * * ALLINLE_ROOT=/opt/allinle /opt/allinle/deploy/scripts/backup-db.sh >> /opt/allinle/logs/backup.log 2>&1
 ```
 
 ### 手动备份
 
 ```bash
+cd /opt/allinle
 bash deploy/scripts/backup-db.sh
-# 备份文件位于 /var/backups/allinle/
 ```
 
 ### 恢复
 
 ```bash
-bash deploy/scripts/restore-db.sh /var/backups/allinle/allinle_20260709_020000.sql.gz
+cd /opt/allinle
+bash deploy/scripts/restore-db.sh backups/allinle_YYYYMMDD_HHMMSS.sql.gz
 ```
+
+恢复会要求输入 `RESTORE` 二次确认。自动化恢复时可在文件参数后添加 `--yes`。
 
 ---
 
@@ -476,7 +544,7 @@ bash deploy/scripts/restore-db.sh /var/backups/allinle/allinle_20260709_020000.s
 
 - [ ] AppID 和 Secret 已配置
 - [ ] request 合法域名已添加
-- [ ] socket 合法域名已添加  
+- [ ] socket 合法域名已添加
 - [ ] HTTPS 证书有效
 - [ ] 服务器域名已备案
 - [ ] 所有页面文案检查（无赌博暗示）
@@ -543,11 +611,11 @@ WebSocket 连接使用 `wss://` 协议，需要在公众平台配置 `socket 合
 
 ### 9. Prisma migration 失败
 
-确保 `DATABASE_URL` 正确且数据库可访问。可尝试 `pnpm prisma:migrate` 重新执行。
+确保 `DATABASE_URL` 正确且数据库可访问。生产环境使用 `pnpm prisma:deploy` 重新执行已有迁移。
 
 ### 10. Redis 连接失败
 
-检查 Redis 服务是否启动：`redis-cli ping`。Docker 环境检查 `docker-compose ps`。
+检查 Redis 服务是否启动且密码正确。Docker 环境运行 `docker compose -f docker-compose.prod.yml ps` 查看状态。
 
 ### 11. 生产环境 dev-login 不可用
 

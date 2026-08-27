@@ -29,6 +29,7 @@
     "format": "prettier --write \"apps/**/*.{ts,tsx,js,json,wxml,wxss,css,md}\" \"packages/**/*.{ts,json,md}\" \"docs/**/*.{md,http,html}\" \"*.{json,md,yml,yaml}\"",
     "prisma:generate": "sh -c 'set -a; [ -f .env ] && . ./.env; set +a; pnpm --filter @allinle/api prisma:generate'",
     "prisma:migrate": "sh -c 'set -a; [ -f .env ] && . ./.env; set +a; pnpm --filter @allinle/api prisma:migrate'",
+    "prisma:deploy": "sh -c 'set -a; [ -f .env ] && . ./.env; set +a; pnpm --filter @allinle/api prisma:deploy'",
     "prisma:seed": "sh -c 'set -a; [ -f .env ] && . ./.env; set +a; pnpm --filter @allinle/api prisma:seed'",
     "prisma:studio": "sh -c 'set -a; [ -f .env ] && . ./.env; set +a; pnpm --filter @allinle/api prisma:studio'"
   },
@@ -40,7 +41,7 @@
     "vitest": "^2.1.9"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.0.0"
   },
   "dependencies": {
     "prisma": "^5.22.0"

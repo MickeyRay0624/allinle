@@ -1,19 +1,27 @@
+const path = require("node:path");
+
+const projectRoot =
+  process.env.ALLINLE_ROOT || path.resolve(__dirname, "../..");
+const apiRoot = path.join(projectRoot, "apps/api");
+const logRoot = process.env.ALLINLE_LOG_DIR || path.join(projectRoot, "logs");
+
 module.exports = {
   apps: [
     {
       name: "allinle-api",
       script: "dist/main.js",
-      cwd: "/var/www/allinle/apps/api",
+      cwd: apiRoot,
       env: {
         NODE_ENV: "production",
-        PORT: "3000",
+        PORT: process.env.PORT || "3000",
       },
-      instances: 2,
+      instances: Number(process.env.WEB_CONCURRENCY || 1),
       exec_mode: "cluster",
-      max_memory_restart: "512M",
-      log_date_format: "YYYY-MM-DD HH:mm:ss Z",
-      error_file: "/var/log/allinle/api-error.log",
-      out_file: "/var/log/allinle/api-out.log",
+      max_memory_restart: process.env.MAX_MEMORY_RESTART || "512M",
+      merge_logs: true,
+      time: true,
+      error_file: path.join(logRoot, "api-error.log"),
+      out_file: path.join(logRoot, "api-out.log"),
     },
   ],
 };
